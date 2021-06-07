@@ -1,39 +1,98 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Reflection;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
+using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using Newtonsoft.Json;
-using RestSharp;
 
 namespace DotNetClient
 {
     public class Program
     {
-        private const string ClientId = "ENTER_CLIENT_ID";
-        private const string ClientSecret = "ENTER_CLIENT_SECRET";
-        private const string ApiUrl = "https://hp-cloud-api-app-dev.azurewebsites.net/";
+        // Step 1/4 - Insert your client id and certificate password here.  
+        private const string ClientId = "ENTER_YOUR_VALUE_HERE"; // The identity of this application
+        private const string CertificatePassword = "ENTER_YOUR_VALUE_HERE";
+
+        // Step 2/4 - Add the certificate to the root of the solution
+        // Step 3/4 - Make sure the file name matches this variable including the .pfx extension
+        // Step 4/4 - Right click certificate --> properties --> set "Copy to output folder: always"
+        private const string CertificatePath = "myCertificateName.pfx";
+
+        // Other constants
+        private const string ApiUrl = "https://hp-cloud-api-app-dev.azurewebsites.net/"; // Heimdall API URL
+        private const string Authority =
+            "https://login.microsoftonline.com/132d3d43-145b-4d30-aaf3-0a47aa7be073"; // Heimdall's Azure tenant
+        private const string Scope = "971c3c3b-0b7c-4991-bc10-6ac424c58779/.default"; // Which scope does this application require? The id here is the Heimdall API's client id
+
 
         private static async Task Main()
         {
             Console.WriteLine("Hello Heimdall!");
+
+            // Get an access token representing the identity of this application
+            var accessToken = await GetAccessToken(ClientId);
+
+            // Create a http client which forwards the access token
+            var heimdallClient = GetHeimdallApiClient(accessToken);
+
+            // Get data from the API 
             var neuronId = 717;
             var toDate = DateTime.Now;
             var fromDate = DateTime.Now.AddDays(-7);
 
-            await GetLineMeasurements(neuronId, fromDate, toDate);
+            await GetMeasurementsForPowerLine(neuronId, fromDate, toDate, heimdallClient);
+        }
+        private static string GetCurrentDirectoryFromExecutingAssembly()
+        {
+            var codeBase = typeof(Program).GetTypeInfo().Assembly.CodeBase;
+
+            var uri = new UriBuilder(codeBase);
+            var path = Uri.UnescapeDataString(uri.Path);
+            return Path.GetDirectoryName(path);
         }
 
-        static async Task GetLineMeasurements(int neuronId, DateTime fromDate, DateTime toDate)
+        private static async Task<string> GetAccessToken(string clientId)
+        {
+            Console.WriteLine("Retrieving access token...");
+            var certPath = Path.Combine(GetCurrentDirectoryFromExecutingAssembly(), CertificatePath);
+            var certfile = File.OpenRead(certPath);
+            var certificateBytes = new byte[certfile.Length];
+            certfile.Read(certificateBytes, 0, (int)certfile.Length);
+            var cert = new X509Certificate2(
+                certificateBytes,
+                CertificatePassword,
+                X509KeyStorageFlags.Exportable |
+                X509KeyStorageFlags.MachineKeySet |
+                X509KeyStorageFlags.PersistKeySet);
+
+            var certificate = new ClientAssertionCertificate(clientId, cert);
+            AuthenticationContext context = new AuthenticationContext(Authority);
+            AuthenticationResult authenticationResult = await context.AcquireTokenAsync(Scope, certificate);
+
+            Console.WriteLine($"Token retrieved. The token will expire on {authenticationResult.ExpiresOn}");
+            return authenticationResult.AccessToken;
+        }
+
+        private static HttpClient GetHeimdallApiClient(string accessToken)
         {
             var httpClient = new HttpClient()
             {
                 BaseAddress = new Uri(ApiUrl)
             };
 
-            var accessToken = GetAccessToken();
             httpClient.DefaultRequestHeaders.Authorization =
                 new AuthenticationHeaderValue("Bearer", accessToken);
+
+            return httpClient;
+        }
+
+        private static async Task GetMeasurementsForPowerLine(int neuronId, DateTime fromDate, DateTime toDate, HttpClient heimdallClient)
+        {
+            
 
             var dateFormat = "yyyy-MM-ddThh:mm:ss.fffZ";
 
@@ -42,9 +101,9 @@ namespace DotNetClient
                       $"toDateTime={toDate.ToString(dateFormat)}&" +
                       $"neuronId={neuronId}";
 
-            Console.WriteLine($"Sending request to {httpClient.BaseAddress}{url}");
+            Console.WriteLine($"Sending request to {heimdallClient.BaseAddress}{url}");
 
-            var response = await httpClient.GetAsync(url);
+            var response = await heimdallClient.GetAsync(url);
             Console.WriteLine($"Response: {response}");
 
             var jsonString = await response.Content.ReadAsStringAsync();
@@ -70,24 +129,8 @@ namespace DotNetClient
             }
         }
 
-        static string GetAccessToken()
-        {
-            Console.WriteLine("Retrieving access token...");
-            var client = new RestClient("https://login.microsoftonline.com/132d3d43-145b-4d30-aaf3-0a47aa7be073/oauth2/v2.0/token");
-            client.Timeout = -1;
-            var request = new RestRequest(Method.POST);
-            request.AddHeader("Content-Type", "application/x-www-form-urlencoded");
-            request.AddParameter("client_id", ClientId);
-            request.AddParameter("client_secret", ClientSecret);
-            request.AddParameter("grant_type", "client_credentials");
-            request.AddParameter("scope", "971c3c3b-0b7c-4991-bc10-6ac424c58779/.default");
-
-            IRestResponse response = client.Execute(request);
-            var tokenResponse = JsonConvert.DeserializeObject<TokenResponse>(response.Content);
-
-            Console.WriteLine($"Token retrieved. The token will expire in {tokenResponse.expires_in} seconds. \n{tokenResponse.access_token}");
-            return tokenResponse.access_token;
-        }
+ 
+    
     }
 
     public class TokenResponse
