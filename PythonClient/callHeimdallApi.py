@@ -12,11 +12,11 @@ tokenResponse = None
 requestHeaders = None
 tokenExpiry = None
 
-# Step 1/2 - Insert your client id and certificate thumbprint here.  
-clientID = 'INSERT_YOUR_CLIENT_ID'
-thumbprint = 'INSERT_YOUR_THUMBPRINT'
-# Step 2/2 - Add the certificate to the solution (with .pem extension) and make sure the certFile variable points to it 
-certfile = '.\\INSERT_THE_NAME_OF_YOUR_CERTIFICATE_INCLUDING_EXTENSION.pem'
+# Insert proper variables here
+clientID = 'INSERT_VARIABLE_HERE'
+thumbprint = 'INSERT_VARIABLE_HERE'
+pathToCertificateKeyFile = '.\\INSERT_VARIABLE_HERE.pem' # include the .pem extension
+passphraseToDecryptKey = 'INSERT_VARIABLE_HERE'
 
 # Other constants
 tenantID = '132d3d43-145b-4d30-aaf3-0a47aa7be073'
@@ -30,7 +30,8 @@ def getAccessToken(clientID, scope, authority, thumbprint, certfile):
         authority=authority, 
         client_credential={
             'thumbprint': thumbprint, 
-            'private_key': open(certfile).read()
+            'private_key': open(certfile).read(),
+            'passphrase': passphraseToDecryptKey
         }
     ) 
     result = app.acquire_token_for_client(scopes=scope)
@@ -79,7 +80,7 @@ def getDateTimeStringForApi(datetime):
 try:
     try:
         # Get a new Access Token using Client Credentials Flow and a certificate
-        tokenResponse = getAccessToken(clientID, scope, authority, thumbprint, certfile)
+        tokenResponse = getAccessToken(clientID, scope, authority, thumbprint, pathToCertificateKeyFile)
 
     except Exception as err:
         print('Error acquiring authorization token. Check your tenantID, clientID and certficate thumbprint.')
