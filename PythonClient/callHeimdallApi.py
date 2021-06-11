@@ -15,8 +15,7 @@ tokenExpiry = None
 # Insert proper variables here
 clientID = 'INSERT_VARIABLE_HERE'
 thumbprint = 'INSERT_VARIABLE_HERE'
-pathToCertificateKeyFile = '.\\INSERT_VARIABLE_HERE.pem' # include the .pem extension
-passphraseToDecryptKey = 'INSERT_VARIABLE_HERE'
+pathToCertificatePrivateKey = '.\\INSERT_PATH_HERE.pem'
 
 # Other constants
 tenantID = '132d3d43-145b-4d30-aaf3-0a47aa7be073'
@@ -30,8 +29,7 @@ def getAccessToken(clientID, scope, authority, thumbprint, certfile):
         authority=authority, 
         client_credential={
             'thumbprint': thumbprint, 
-            'private_key': open(certfile).read(),
-            'passphrase': passphraseToDecryptKey
+            'private_key': open(certfile).read()
         }
     ) 
     result = app.acquire_token_for_client(scopes=scope)
@@ -80,7 +78,7 @@ def getDateTimeStringForApi(datetime):
 try:
     try:
         # Get a new Access Token using Client Credentials Flow and a certificate
-        tokenResponse = getAccessToken(clientID, scope, authority, thumbprint, pathToCertificateKeyFile)
+        tokenResponse = getAccessToken(clientID, scope, authority, thumbprint, pathToCertificatePrivateKey)
 
     except Exception as err:
         print('Error acquiring authorization token. Check your tenantID, clientID and certficate thumbprint.')

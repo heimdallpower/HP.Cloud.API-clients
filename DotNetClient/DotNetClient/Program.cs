@@ -13,14 +13,9 @@ namespace DotNetClient
 {
     public class Program
     {
-        // Step 1/4 - Insert your client id and certificate password here.  
-        private const string ClientId = "ENTER_YOUR_VALUE_HERE"; // The identity of this application
-        private const string CertificatePassword = "ENTER_YOUR_VALUE_HERE";
-
-        // Step 2/4 - Add the certificate to the root of the solution
-        // Step 3/4 - Make sure the file name matches this variable including the .pfx extension
-        // Step 4/4 - Right click certificate --> properties --> set "Copy to output folder: always"
-        private const string CertificatePath = "myCertificateName.pfx";
+        private const string ClientId = "INSERT_VARIABLE_HERE";
+        private const string PfxCertificatePath = "INSERT_VARIABLE_HERE";
+        private const string CertificatePassword = "INSERT_VARIABLE_HERE";
 
         // Other constants
         private const string ApiUrl = "https://hp-cloud-api-app-dev.azurewebsites.net/"; // Heimdall API URL
@@ -58,7 +53,7 @@ namespace DotNetClient
         private static async Task<string> GetAccessToken(string clientId)
         {
             Console.WriteLine("Retrieving access token...");
-            var certPath = Path.Combine(GetCurrentDirectoryFromExecutingAssembly(), CertificatePath);
+            var certPath = Path.Combine(GetCurrentDirectoryFromExecutingAssembly(), PfxCertificatePath);
             var certfile = File.OpenRead(certPath);
             var certificateBytes = new byte[certfile.Length];
             certfile.Read(certificateBytes, 0, (int)certfile.Length);

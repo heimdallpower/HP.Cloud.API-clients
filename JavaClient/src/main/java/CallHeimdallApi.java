@@ -170,8 +170,8 @@ class CallHeimdallApi {
         properties.load(Thread.currentThread().getContextClassLoader().getResourceAsStream("application.properties"));
         authority = properties.getProperty("AUTHORITY");
         clientId = properties.getProperty("CLIENT_ID");
-        keyPath = properties.getProperty("KEY_PATH");
-        certPath = properties.getProperty("CERT_PATH");
+        keyPath = properties.getProperty("PKCS8_PRIVATE_KEY_PATH");
+        certPath = properties.getProperty("CRT_CERTIFICATE_PATH");
         scope = properties.getProperty("SCOPE");
         apiUrl = properties.getProperty("API_URL");
     }
