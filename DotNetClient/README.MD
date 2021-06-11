@@ -1,5 +1,5 @@
 # Requirements
-* .NET 3.1 SDK: https://www.microsoft.com/net/download/windows
+* .NET 5 SK: https://www.microsoft.com/net/download/windows
 
 # Setup
 1. Open [`Program.cs`](DotNetClient/Program.cs)
