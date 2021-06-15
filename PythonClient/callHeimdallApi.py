@@ -20,8 +20,8 @@ pathToCertificatePrivateKey = '.\\INSERT_PATH_HERE.pem'
 # Other constants
 tenantID = '132d3d43-145b-4d30-aaf3-0a47aa7be073'
 authority = 'https://login.microsoftonline.com/' + tenantID
-scope = ['971c3c3b-0b7c-4991-bc10-6ac424c58779/.default']
-apiUrl = 'https://hp-cloud-api-app-dev.azurewebsites.net/'
+scope = ['8ecd41dd-9d79-4440-b029-8ea602733d60/.default']
+apiUrl = 'https://api.heimdallcloud.com/'
 
 
 def getAccessToken(clientID, scope, authority, thumbprint, certfile):
@@ -47,7 +47,7 @@ def getMeasurementsForPowerLine():
         'accept': 'text/plain'
     }
 
-    neuronId = 717
+    neuronId = 703
     toDate = datetime.utcnow().astimezone()
     fromDate = datetime.utcnow().astimezone() - timedelta(days=7)
 

@@ -16,7 +16,7 @@ Each client authenticates with the OAuth 2.0 client credentials flow using certi
 
 ## Swagger
 
-The swagger interface found [here](https://hp-cloud-api-app-dev.azurewebsites.net/index.html) provides detailed descriptions about the different REST endpoints. 
+The swagger interface found [here](https://api.heimdallcloud.com/index.html) provides detailed descriptions about the different REST endpoints. 
 
 It gives information about
 * how to construct requests

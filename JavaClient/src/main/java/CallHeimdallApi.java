@@ -90,7 +90,7 @@ class CallHeimdallApi {
 
     private static List<Measurement> getMeasurementsForPowerLine(String accessToken) throws IOException {
 
-        int neuronId = 717;
+        int neuronId = 703;
         Date toDate = new Date(System.currentTimeMillis());
         Date fromDate = new Date((long) (System.currentTimeMillis() - (7 * 8.64e+7))); // 8.64e+7 = 1 day in milliseconds
 

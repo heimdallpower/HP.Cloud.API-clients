@@ -18,10 +18,10 @@ namespace DotNetClient
         private const string CertificatePassword = "INSERT_VARIABLE_HERE";
 
         // Other constants
-        private const string ApiUrl = "https://hp-cloud-api-app-dev.azurewebsites.net/"; // Heimdall API URL
+        private const string ApiUrl = "https://api.heimdallcloud.com"; // Heimdall API URL
         private const string Authority =
             "https://login.microsoftonline.com/132d3d43-145b-4d30-aaf3-0a47aa7be073"; // Heimdall's Azure tenant
-        private const string Scope = "971c3c3b-0b7c-4991-bc10-6ac424c58779/.default"; // Which scope does this application require? The id here is the Heimdall API's client id
+        private const string Scope = "8ecd41dd-9d79-4440-b029-8ea602733d60/.default"; // Which scope does this application require? The id here is the Heimdall API's client id
 
 
         private static async Task Main()
@@ -35,7 +35,7 @@ namespace DotNetClient
             var heimdallClient = GetHeimdallApiClient(accessToken);
 
             // Get data from the API 
-            var neuronId = 717;
+            var neuronId = 703;
             var toDate = DateTime.Now;
             var fromDate = DateTime.Now.AddDays(-7);
 
