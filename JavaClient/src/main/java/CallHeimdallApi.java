@@ -96,7 +96,7 @@ class CallHeimdallApi {
 
         StringBuilder urlBuilder = new StringBuilder();
         urlBuilder
-            .append(apiUrl + "api/measurements")
+            .append(apiUrl + "api/beta/measurements")
             // You can also use the more detailed format: yyyy-MM-dd'T'HH:mm:ss'Z'
             .append("?fromDateTime=" + fromDate.toString())
             .append("&toDateTime=" + toDate.toString())

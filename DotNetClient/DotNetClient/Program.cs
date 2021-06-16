@@ -91,7 +91,7 @@ namespace DotNetClient
 
             var dateFormat = "yyyy-MM-ddThh:mm:ss.fffZ";
 
-            var url = "api/measurements?" +
+            var url = "api/beta/measurements?" +
                       $"fromDateTime={fromDate.ToString(dateFormat)}&" +
                       $"toDateTime={toDate.ToString(dateFormat)}&" +
                       $"neuronId={neuronId}";

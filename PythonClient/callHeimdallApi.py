@@ -51,7 +51,7 @@ def getMeasurementsForPowerLine():
     toDate = datetime.utcnow().astimezone()
     fromDate = datetime.utcnow().astimezone() - timedelta(days=7)
 
-    url = '{}api/measurements?fromDateTime={}&toDateTime={}&neuronId={}'.format(apiUrl, getDateTimeStringForApi(fromDate), getDateTimeStringForApi(toDate), neuronId)
+    url = '{}api/beta/measurements?fromDateTime={}&toDateTime={}&neuronId={}'.format(apiUrl, getDateTimeStringForApi(fromDate), getDateTimeStringForApi(toDate), neuronId)
 
     try:
         response = requests.get(url, headers=requestHeaders)
