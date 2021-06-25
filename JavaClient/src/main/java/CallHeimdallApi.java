@@ -17,6 +17,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.KeyFactory;
@@ -30,6 +31,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 class CallHeimdallApi {
 
@@ -45,14 +47,30 @@ class CallHeimdallApi {
         loadProperties();
 
         try {
+            System.out.println("Hello Heimdall!");
+
             IAuthenticationResult result = getAccessTokenByClientCredentialGrant();
             System.out.println("Access token = " + result.accessToken());
-            List<Measurement> measurements = getMeasurementsForPowerLine(result.accessToken());
-            for(Measurement measurement : measurements) {
-                System.out.println(measurement.toString());
-            }
+            String accessToken = result.accessToken();
 
-            System.out.println("Measurements found: " + measurements.size());
+
+            List<String> lineNames = getLineNames(accessToken);
+           
+            if(lineNames.size() <= 0) {
+                System.out.println("Didn't find any lines");
+            }
+            else{
+                String chosenLine = lineNames.get(0);
+                System.out.println("Requesting data for line with name: " + chosenLine);
+
+                List<AggregatedMeasurement> measurements = getAggregatedMeasurementsForLine(accessToken, chosenLine);
+                for(AggregatedMeasurement measurement : measurements) {
+                    System.out.println(measurement.toString());
+                }
+    
+                System.out.println("Measurements found in the last week: " + measurements.size());
+            }
+           
             System.out.println("Press any key to exit ...");
             System.in.read();
 
@@ -87,24 +105,84 @@ class CallHeimdallApi {
         CompletableFuture<IAuthenticationResult> future = app.acquireToken(clientCredentialParam);
         return future.get();
     }
+    private static List<String> getLineNames(String accessToken) throws IOException {
+        StringBuilder urlBuilder = new StringBuilder();
+        urlBuilder.append(apiUrl + "api/beta/lines");
+        System.out.println("Sending request to url: " + urlBuilder.toString());
+        URL url = new URL(urlBuilder.toString());
+        
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestMethod("GET");
+        conn.setRequestProperty("Authorization", "Bearer " + accessToken);
 
-    private static List<Measurement> getMeasurementsForPowerLine(String accessToken) throws IOException {
+        int httpResponseCode = conn.getResponseCode();
 
-        int neuronId = 703;
+        if(httpResponseCode == HTTPResponse.SC_OK) {
+
+            StringBuilder response;
+            try(BufferedReader in = new BufferedReader(
+                    new InputStreamReader(conn.getInputStream()))){
+
+                String inputLine;
+                response = new StringBuilder();
+                while (( inputLine = in.readLine()) != null) {
+                    response.append(inputLine);
+                }
+            }
+            Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'").create();
+            LineResponse lineResponse = gson.fromJson(response.toString(),LineResponse.class);
+            List<LineDto> lineDtos = lineResponse.data;
+            for(LineDto lineDto : lineDtos) {
+                System.out.println("Found line "+ lineDto.toString() + "\n");
+            }
+
+            List<String> lineNames = lineDtos.stream().map(lineDto -> lineDto.name).collect(Collectors.toList());
+            return lineNames;
+        } else {
+            StringBuilder errorResponse;
+            try(BufferedReader in = new BufferedReader(
+                    new InputStreamReader(conn.getErrorStream()))){
+
+                String inputLine;
+                errorResponse = new StringBuilder();
+                while (( inputLine = in.readLine()) != null) {
+                    errorResponse.append(inputLine);
+                }
+            }
+            System.out.println("Response: " + conn.getResponseMessage());
+        
+            System.out.println(
+                String.format("Connection returned HTTP code: %s with message: %s, details:\n%s",
+                    httpResponseCode, 
+                    conn.getResponseMessage(),
+                    prettifyJsonString(errorResponse.toString())
+                ));
+
+
+            return Collections.emptyList();
+        }
+    }
+    private static List<AggregatedMeasurement> getAggregatedMeasurementsForLine(String accessToken, String lineName) throws IOException {
+
         Date toDate = new Date(System.currentTimeMillis());
         Date fromDate = new Date((long) (System.currentTimeMillis() - (7 * 8.64e+7))); // 8.64e+7 = 1 day in milliseconds
 
-        StringBuilder urlBuilder = new StringBuilder();
-        urlBuilder
-            .append(apiUrl + "api/beta/measurements")
+        String endpointUrl = apiUrl + "api/beta/aggregated-measurements";
+        StringBuilder paramsBuilder = new StringBuilder();
+        paramsBuilder
             // You can also use the more detailed format: yyyy-MM-dd'T'HH:mm:ss'Z'
             .append("?fromDateTime=" + fromDate.toString())
             .append("&toDateTime=" + toDate.toString())
-            .append("&neuronId=" + neuronId);
+            .append("&measurementType=" + MeasurementType.Current)
+            .append("&aggregationType=" + AggregationType.Max)
+            .append("&intervalDuration=" + IntervalDuration.EveryDay)
+            .append("&lineName=" + URLEncoder.encode(lineName, "UTF-8"));
 
-        System.out.println("Sending request to url: " + urlBuilder.toString());
+
+        String encodedUrl  = endpointUrl + paramsBuilder.toString();
+        System.out.println("Sending request to url: " + encodedUrl);
     
-        URL url = new URL(urlBuilder.toString());
+        URL url = new URL(encodedUrl);
 
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setRequestMethod("GET");
@@ -125,7 +203,7 @@ class CallHeimdallApi {
                 }
             }
             Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'").create();
-            MeasurementResponse measurementResponse = gson.fromJson(response.toString(),MeasurementResponse.class);
+            AggregatedMeasurementsResponse measurementResponse = gson.fromJson(response.toString(),AggregatedMeasurementsResponse.class);
 
             return measurementResponse.data;
         } else {
@@ -139,6 +217,8 @@ class CallHeimdallApi {
                     errorResponse.append(inputLine);
                 }
             }
+            System.out.println(
+                "Request response" + conn.getResponseMessage() + errorResponse);
         
             System.out.println(
                 String.format("Connection returned HTTP code: %s with message: %s, details:\n%s",
@@ -154,7 +234,7 @@ class CallHeimdallApi {
 
     private static String prettifyJsonString(String json){
         JsonParser parser = new JsonParser();
-        Gson gson = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
         JsonElement el = parser.parse(json);
         return gson.toJson(el);
@@ -176,35 +256,85 @@ class CallHeimdallApi {
         apiUrl = properties.getProperty("API_URL");
     }
 
-    public static  class MeasurementResponse {
-        List<Measurement> data;
+    public static  class LineResponse {
+        List<LineDto> data;
         int code;
         String message;
         public String toString() {
-            return "HeimdallResponse (" + 
+            return "LineResponse (" + 
                 "data= " + data +
                 ", code= " + code +
                 ", message= " + message +
             ")";
         }
     }
-    public static class Measurement {
-        double current;
-        double wireTemperature;
-        double housingTemperature;
-        Date timeObserved;
-        int neuronId;
+    
+    public static  class LineDto {
+        String name;
+        String owner;
+        List<LineSpanDto> lineSpans;
+        public String toString() {
+            return "\nName: " + name +
+                "\nOwner: " + owner +
+                "\nLinespans in line: " + lineSpans.size() + 
+                "\n" + lineSpans;
+        }
+    }
+    public static  class LineSpanDto {
+        String name;
+        public String toString() {
+            return name;
+        }
+    }
+    public static  class AggregatedMeasurementsResponse {
+        List<AggregatedMeasurement> data;
+        int code;
+        String message;
+        public String toString() {
+            return "AggregatedMeasurementResponse (" + 
+                "code= " + code +
+                "message= " + message +
+                ", Measurement count= " + data.size();
+        }
+     }
+    //  public static  class AggregatedMeasurementsResponse {
+    //     List<AggregatedMeasurement> data;
+    //     int code;
+    //     String message;
+    //     public String toString() {
+    //         return "AggregatedMeasurementResponse (" + 
+    //             "data= " + data +
+    //             ", code= " + code +
+    //             ", message= " + message +
+    //         ")";
+    //     }
+    // }
+    public static class AggregatedMeasurement {
+        double value;
+        Date intervalStartTime;
 
         @Override
         public String toString() {
-            return "Measurement (" + 
-                "current= " + current +
-                ", wireTemperature= " + wireTemperature +
-                ", housingTemperature= " + housingTemperature +
-                ", timeObserved= " + DateFormat.getInstance().format(timeObserved) +
-                ", neuronId= " + neuronId +
-            ")";
+            return "Current at " + DateFormat.getInstance().format(intervalStartTime) + ": " + value +"A";
         }
+    }
+
+    enum AggregationType {
+        Max,
+        Min,
+        Average
+    }
+    
+    public static class IntervalDuration
+    {
+        public static String Every5Minutes = "PT5M";
+        public static String EveryDay= "P1D";
+
+    }
+    enum MeasurementType
+    {
+        Current,
+        WireTemperature
     }
 }
 

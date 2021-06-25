@@ -1,9 +1,10 @@
+from enum import Enum
 import msal
 import jwt
 import json
 import requests
+import urllib.parse
 from datetime import date, datetime, timedelta
-
 global tokenResponse
 global requestHeaders
 global tokenExpiry
@@ -23,6 +24,16 @@ authority = 'https://login.microsoftonline.com/' + tenantID
 scope = ['8ecd41dd-9d79-4440-b029-8ea602733d60/.default']
 apiUrl = 'https://api.heimdallcloud.com/'
 
+class MeasurementType(str, Enum):
+    Current = 'Current'
+    WireTemperature = 'WireTemperature'
+class IntervalDuration(str, Enum):
+    Every5Minutes = 'PT5M'
+    EveryDay = 'P1D'
+class AggregationType(str, Enum):
+    MIN = 'Min'
+    MAX = 'Max'
+    AVERAGE = 'Average'
 
 def getAccessToken(clientID, scope, authority, thumbprint, certfile):
     app = msal.ConfidentialClientApplication(clientID, 
@@ -41,7 +52,34 @@ def getDecodedToken(accessToken):
     print('Token claims', accessTokenFormatted)
     return decodedAccessToken
 
-def getMeasurementsForPowerLine():
+def getLineNames():
+    requestHeaders = {
+        'Authorization': 'Bearer ' + tokenResponse['access_token'],
+        'accept': 'text/plain'
+    }
+
+    url = apiUrl + 'api/beta/lines'
+
+    try:
+        print('Sending request: ', url,'\n')
+        response = requests.get(url, headers=requestHeaders)
+        responseInJson = response.json()
+
+        if not response.ok:
+            print('Request failed', response.json())
+            return
+
+        lines = responseInJson['data']
+
+        for line in lines:
+            print('You can request data for the following lines and line spans:\nName: {}\nOwner: {}\nLine spans in line: {}\n'.format(line['name'], line['owner'], line['lineSpans']))
+
+        print('Message: {}. Found {} lines'.format(responseInJson['message'], len(lines)))
+        return lines
+    except Exception as error:
+        print('Exception occured', error)
+
+def getAggregatedCurrentForLine(lineName):
     requestHeaders = {
         'Authorization': 'Bearer ' + tokenResponse['access_token'],
         'accept': 'text/plain'
@@ -51,24 +89,35 @@ def getMeasurementsForPowerLine():
     toDate = datetime.utcnow().astimezone()
     fromDate = datetime.utcnow().astimezone() - timedelta(days=7)
 
-    url = '{}api/beta/measurements?fromDateTime={}&toDateTime={}&neuronId={}'.format(apiUrl, getDateTimeStringForApi(fromDate), getDateTimeStringForApi(toDate), neuronId)
+    url = '{}api/beta/aggregated-measurements?fromDateTime={}&toDateTime={}&lineName={}&aggregationType={}&intervalDuration={}&measurementType={}'.format(
+        apiUrl, 
+        getDateTimeStringForApi(fromDate), 
+        getDateTimeStringForApi(toDate), 
+        urllib.parse.quote_plus(lineName, encoding='UTF-8'),
+        AggregationType.MAX,
+        IntervalDuration.EveryDay,
+        MeasurementType.Current
+    )
 
     try:
+        print('Sending request: ', url, '\n')
         response = requests.get(url, headers=requestHeaders)
         responseInJson = response.json()
 
-        if not response.ok or response.ok and responseInJson['code'] != 200:
+        if not response.ok:
             print('Request failed', response.json())
             return
 
-        responseCode = responseInJson['code']
-        message = responseInJson['message']
-        measurements = responseInJson['data']
+        print('Response code: ', responseInJson['code'], ', message:', responseInJson['message'])
+        aggregatedMeasurements = responseInJson['data']
 
-        for measurement in measurements:
-            print('Measurement at {}: Current: {}, Wire: {}, Housing: {}'.format(measurement['timeObserved'], measurement['current'], measurement['wireTemperature'], measurement['housingTemperature']))
+        for measurement in aggregatedMeasurements:
+            print('Current at {}: {}A'.format(
+                measurement['intervalStartTime'], 
+                measurement['value']
+            ))
 
-        print('Code: {} - {} - found {} measurements'.format(responseCode, message, len(measurements)))
+        print('Got {} measurements in response'.format(len(aggregatedMeasurements)))
     except Exception as error:
         print('Exception occured', error)
 
@@ -77,6 +126,7 @@ def getDateTimeStringForApi(datetime):
 
 try:
     try:
+        print('Hello Heimdall!')
         # Get a new Access Token using Client Credentials Flow and a certificate
         tokenResponse = getAccessToken(clientID, scope, authority, thumbprint, pathToCertificatePrivateKey)
 
@@ -94,10 +144,17 @@ try:
 
     # Get data from API
     if isTokenValid:
-        getMeasurementsForPowerLine()
+        lineNames = getLineNames()
+        if len(lineNames) < 0:
+            print("Didn't find any lines")
+        else:
+            chosenLineName = lineNames[0]['name']
+            print('Requesting aggregated current data for the line:', chosenLineName, '\n')
+            getAggregatedCurrentForLine(chosenLineName)
         
     else:
         print('Need to get a new token')
 
 except Exception as err:
     print(err)
+
