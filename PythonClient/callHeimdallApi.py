@@ -108,7 +108,7 @@ def getAggregatedCurrentForLine(lineName):
             print('Request failed', response.json())
             return
 
-        print('Response code: ', responseInJson['code'], ', message:', responseInJson['message'])
+        print('Response message:', responseInJson['message'])
         aggregatedMeasurements = responseInJson['data']
 
         for measurement in aggregatedMeasurements:
