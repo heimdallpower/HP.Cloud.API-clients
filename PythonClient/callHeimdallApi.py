@@ -35,6 +35,11 @@ class AggregationType(str, Enum):
     MAX = 'Max'
     AVERAGE = 'Average'
 
+class DLRType(str, Enum):
+    HP = 'HP'
+    Cigre = 'Cigre'
+    IEEE = 'IEEE'
+
 def getAccessToken(clientID, scope, authority, thumbprint, certfile):
     app = msal.ConfidentialClientApplication(clientID, 
         authority=authority, 
@@ -105,19 +110,60 @@ def getAggregatedCurrentForLine(lineName):
         responseInJson = response.json()
 
         if not response.ok:
-            print('Request failed', response.json())
+            print('Measurement request failed', response.json())
             return
 
-        print('Response message:', responseInJson['message'])
+        print('Measurement response message:', responseInJson['message'])
         aggregatedMeasurements = responseInJson['data']
 
         for measurement in aggregatedMeasurements:
-            print('Current at {}: {}A'.format(
+            print('Current at {}: {} A'.format(
                 measurement['intervalStartTime'], 
                 measurement['value']
             ))
 
         print('Got {} measurements in response'.format(len(aggregatedMeasurements)))
+    except Exception as error:
+        print('Exception occured', error)
+
+def getDynamicLineRatingsForLine(lineName, dlrType):
+    requestHeaders = {
+        'Authorization': 'Bearer ' + tokenResponse['access_token'],
+        'accept': 'text/plain'
+    }
+
+    neuronId = 703
+    toDate = datetime.utcnow().astimezone()
+    fromDate = datetime.utcnow().astimezone() - timedelta(days=7)
+
+    url = '{}api/beta/aggregated-dlr?fromDateTime={}&toDateTime={}&lineName={}&dlrType={}&intervalDuration={}'.format(
+        apiUrl, 
+        getDateTimeStringForApi(fromDate), 
+        getDateTimeStringForApi(toDate), 
+        urllib.parse.quote_plus(lineName, encoding='UTF-8'),
+        dlrType,
+        IntervalDuration.EveryDay,
+    )
+
+    try:
+        print('Sending DLR request: ', url, '\n')
+        response = requests.get(url, headers=requestHeaders)
+        responseInJson = response.json()
+
+        if not response.ok:
+            print('DLR request failed', response.json())
+            return
+
+        print('DLR response message:', responseInJson['message'])
+        aggregatedMeasurements = responseInJson['data']
+
+        for measurement in aggregatedMeasurements:
+            print('Dynamic line rating at {}: {} A'.format(
+                measurement['intervalStartTime'], 
+                measurement['ampacity']
+            ))
+
+        print('Got {} DLRs in response'.format(len(aggregatedMeasurements)))
     except Exception as error:
         print('Exception occured', error)
 
@@ -151,6 +197,7 @@ try:
             chosenLineName = lineNames[0]['name']
             print('Requesting aggregated current data for the line:', chosenLineName, '\n')
             getAggregatedCurrentForLine(chosenLineName)
+            getDynamicLineRatingsForLine(chosenLineName, DLRType.HP)
         
     else:
         print('Need to get a new token')

@@ -31,7 +31,7 @@ namespace DotNetClient
         {
             Console.WriteLine("Hello Heimdall!");
 
-            // Create a http client which forwards the access token
+            // Create a http client which forwards the access token to the Heimdall API. For production usage of HttpClient, see this https://docs.microsoft.com/en-us/dotnet/architecture/microservices/implement-resilient-applications/use-httpclientfactory-to-implement-resilient-http-requests
             var heimdallClient = await GetHeimdallApiClient();
 
             var lineNames = await GetLineNames(heimdallClient);
@@ -47,6 +47,7 @@ namespace DotNetClient
                 var fromDate = DateTime.Now.AddDays(-7);
 
                 await GetAggregatedMeasurementsForLine(chosenLine, fromDate, toDate, heimdallClient);
+                await GetDynamicLineRatingsForLine(chosenLine, fromDate, toDate, DLRType.HP, heimdallClient);
             }
            
         }
@@ -121,13 +122,13 @@ namespace DotNetClient
                 dynamic parsedJson = JsonConvert.DeserializeObject(jsonString);
                 var exceptionString = JsonConvert.SerializeObject(parsedJson, Formatting.Indented);
                 Console.WriteLine($"Lines request failed, exception: {exceptionString}");
+                return new List<string>();
             }
-            return new List<string>();
 
         }
         private static async Task GetAggregatedMeasurementsForLine(string lineName, DateTime fromDate, DateTime toDate, HttpClient heimdallClient)
         {
-            Console.WriteLine($"Requesting data for line: {lineName}");
+            Console.WriteLine($"Requesting measurements for line: {lineName}");
 
             var dateFormat = "yyyy-MM-ddThh:mm:ss.fffZ";
             // By including the optional lineSpanName
@@ -148,19 +149,57 @@ namespace DotNetClient
 
             if (response.IsSuccessStatusCode)
             {
-                var measurementResponse = JsonConvert.DeserializeObject<AggregatedMeasurementsResponse>(jsonString);
+                var measurementResponse = JsonConvert.DeserializeObject<ApiResponse<AggregatedMeasurementDto>>(jsonString);
 
                 foreach (var measurement in measurementResponse.data)
                 {
-                    Console.WriteLine($"Current at {DateTime.Parse(measurement.intervalStartTime)}: {measurement.value}A\n");
+                    Console.WriteLine($"Current at {DateTime.Parse(measurement.intervalStartTime)}: {measurement.value} A\n");
                 }
-                Console.WriteLine($"Response: {measurementResponse.message} - found {measurementResponse.data.Count} measurements");
+                Console.WriteLine($"Measurement response: {measurementResponse.message} - found {measurementResponse.data.Count} measurements");
             }
             else
             {
                 dynamic parsedJson = JsonConvert.DeserializeObject(jsonString);
                 var exceptionString = JsonConvert.SerializeObject(parsedJson, Formatting.Indented);
-                Console.WriteLine($"Request failed, exception: {exceptionString}");
+                Console.WriteLine($"Measurement request failed, exception: {exceptionString}");
+            }
+        }
+
+        private static async Task GetDynamicLineRatingsForLine(string lineName, DateTime fromDate, DateTime toDate, DLRType dlrType, HttpClient heimdallClient)
+        {
+            Console.WriteLine($"\nRequesting DLR for line: {lineName}");
+
+            var dateFormat = "yyyy-MM-ddThh:mm:ss.fffZ";
+            // By including the optional lineSpanName
+            var url = "api/beta/aggregated-dlr?" +
+                      $"fromDateTime={fromDate.ToString(dateFormat)}&" +
+                      $"toDateTime={toDate.ToString(dateFormat)}&" +
+                      $"intervalDuration={IntervalDuration.EveryDay}&" +
+                      $"dlrType={dlrType}&" +
+                      $"lineName={lineName}";
+
+            Console.WriteLine($"Sending request to {heimdallClient.BaseAddress}{url}");
+
+            var response = await heimdallClient.GetAsync(url);
+
+            var jsonString = await response.Content.ReadAsStringAsync();
+            Console.WriteLine($"Response body: {jsonString}");
+
+            if (response.IsSuccessStatusCode)
+            {
+                var measurementResponse = JsonConvert.DeserializeObject<ApiResponse<DynamicLineRatingDto>>(jsonString);
+
+                foreach (var dynamicLineRating in measurementResponse.data)
+                {
+                    Console.WriteLine($"Dynamic line rating at {DateTime.Parse(dynamicLineRating.intervalStartTime)}: {dynamicLineRating.ampacity} A\n");
+                }
+                Console.WriteLine($"DLR response: {measurementResponse.message} - found {measurementResponse.data.Count} DLRs");
+            }
+            else
+            {
+                dynamic parsedJson = JsonConvert.DeserializeObject(jsonString);
+                var exceptionString = JsonConvert.SerializeObject(parsedJson, Formatting.Indented);
+                Console.WriteLine($"DLR request failed, exception: {exceptionString}");
             }
         }
     }
