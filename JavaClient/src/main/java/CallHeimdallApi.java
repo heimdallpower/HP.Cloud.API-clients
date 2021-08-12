@@ -242,7 +242,7 @@ class CallHeimdallApi {
         Date toDate = new Date(System.currentTimeMillis());
         Date fromDate = new Date((long) (System.currentTimeMillis() - (7 * 8.64e+7))); // 8.64e+7 = 1 day in milliseconds
 
-        String endpointUrl = apiUrl + "api/beta/aggregated-dlr";
+        String endpointUrl = apiUrl + "api/beta/dlr/aggregated-dlr";
         StringBuilder paramsBuilder = new StringBuilder();
         paramsBuilder
             // You can also use the more detailed format: yyyy-MM-dd'T'HH:mm:ss'Z'
