@@ -111,7 +111,7 @@ namespace DotNetClient.Services
 
             var dateFormat = "yyyy-MM-ddThh:mm:ss.fffZ";
             // By including the optional lineSpanName
-            var url = "api/beta/aggregated-dlr?" +
+            var url = "api/beta/dlr/aggregated-dlr?" +
                       $"fromDateTime={fromDate.ToString(dateFormat)}&" +
                       $"toDateTime={toDate.ToString(dateFormat)}&" +
                       $"intervalDuration={IntervalDuration.EveryDay}&" +
