@@ -28,7 +28,7 @@ It gives information about
 ## Updates
 
 **2.7.21** 
-Implemented new endpoint to get dynamic line ratings at `/api/beta/aggregated-dlr`
+Implemented new endpoint to get dynamic line ratings at `/api/beta/dlr/aggregated-dlr`
 
 **25.6.21** 
 Added logic to use the `/api/beta/lines` and `/api/beta/aggregated-measurements` endpoints

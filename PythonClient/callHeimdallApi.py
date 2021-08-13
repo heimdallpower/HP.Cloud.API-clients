@@ -136,7 +136,7 @@ def getDynamicLineRatingsForLine(lineName, dlrType):
     toDate = datetime.utcnow().astimezone()
     fromDate = datetime.utcnow().astimezone() - timedelta(days=7)
 
-    url = '{}api/beta/aggregated-dlr?fromDateTime={}&toDateTime={}&lineName={}&dlrType={}&intervalDuration={}'.format(
+    url = '{}api/beta/dlr/aggregated-dlr?fromDateTime={}&toDateTime={}&lineName={}&dlrType={}&intervalDuration={}'.format(
         apiUrl, 
         getDateTimeStringForApi(fromDate), 
         getDateTimeStringForApi(toDate), 
