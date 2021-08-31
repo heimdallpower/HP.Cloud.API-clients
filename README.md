@@ -9,7 +9,7 @@ Client types
 * Java application
 * Python script
 
-Each client authenticates with the OAuth 2.0 client credentials flow using certicates
+Each client authenticates with the OAuth 2.0 client credentials flow using certificates
 * First the client obtains an access token
 * Each token permits the client to consume the Heimdall API for one hour
 * The client calls the Heimdall API with the token to retrieve the power line and line spans connected to this application
