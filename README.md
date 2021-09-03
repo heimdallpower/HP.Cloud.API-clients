@@ -27,6 +27,10 @@ It gives information about
 
 ## Updates
 
+**3.9.21** 
+* JavaClient - improve structure for readability
+* JavaClient - retrieve power line data for all lines connected to caller's identity
+
 **13.8.21** 
 * DotNetClient - improve structure for readability
 * DotNetClient - retrieve power line data for all lines connected to caller's identity
