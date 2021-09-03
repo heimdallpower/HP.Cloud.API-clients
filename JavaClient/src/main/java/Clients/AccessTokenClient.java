@@ -9,6 +9,9 @@ import java.security.PrivateKey;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.security.spec.PKCS8EncodedKeySpec;
+import java.util.Collections;
+import java.util.concurrent.CompletableFuture;
+
 import com.microsoft.aad.msal4j.ClientCredentialFactory;
 import com.microsoft.aad.msal4j.ClientCredentialParameters;
 import com.microsoft.aad.msal4j.ConfidentialClientApplication;
@@ -26,6 +29,7 @@ public class AccessTokenClient {
         this.certPath = certPath;
         this.clientId = clientId;
         this.authority = authority;
+        this.scope = scope;
     }
 
     public String getAccessToken() throws Exception {
