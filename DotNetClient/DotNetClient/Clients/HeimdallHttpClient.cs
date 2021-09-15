@@ -19,7 +19,7 @@ namespace DotNetClient.Clients
         private const string ApiUrl = "https://api.heimdallcloud.com"; // Heimdall API URL
         private const string Authority =
             "https://login.microsoftonline.com/132d3d43-145b-4d30-aaf3-0a47aa7be073"; // Heimdall's Azure tenant
-        private const string Scope = "8ecd41dd-9d79-4440-b029-8ea602733d60/.default"; // Which scope does this application require? The id here is the Heimdall API's client id
+        private const string Scope = "aac6dec0-4c1b-4565-a825-5bb9401a1547/.default"; // Which scope does this application require? The id here is the Heimdall API's client id
 
         public HeimdallHttpClient(string clientID, string pfxCertificatePath, string certificatePassword)
         {

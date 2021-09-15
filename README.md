@@ -27,6 +27,9 @@ It gives information about
 
 ## Updates
 
+**15.9.21** 
+* Use the new scope of the Heimdall Cloud API
+
 **3.9.21** 
 * JavaClient - improve structure for readability
 * JavaClient - retrieve power line data for all lines connected to caller's identity
