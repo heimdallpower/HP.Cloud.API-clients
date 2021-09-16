@@ -21,7 +21,7 @@ pathToCertificatePrivateKey = '.\\INSERT_PATH_HERE.pem'
 # Other constants
 tenantID = '132d3d43-145b-4d30-aaf3-0a47aa7be073'
 authority = 'https://login.microsoftonline.com/' + tenantID
-scope = ['8ecd41dd-9d79-4440-b029-8ea602733d60/.default']
+scope = ['aac6dec0-4c1b-4565-a825-5bb9401a1547/.default']
 apiUrl = 'https://api.heimdallcloud.com/'
 
 class MeasurementType(str, Enum):
