@@ -8,7 +8,7 @@ namespace DotNetClient.Entities
 {
     class DynamicLineRatingDto
     {
-        public string intervalStartTime { get; set; }
-        public double ampacity { get; set; }
+        public string IntervalStartTime { get; set; }
+        public double Ampacity { get; set; }
     }
 }

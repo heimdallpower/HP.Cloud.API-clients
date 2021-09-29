@@ -30,18 +30,18 @@ public class HeimdallApiService {
     }
     
     public void Run() throws IOException{
-        List<String> lineNames = getLineNames();
+        List<LineDto> lines = getLines();
 
-        for(String lineName : lineNames){
-            System.out.println("Requesting data for line with name: " + lineName);
+        for(LineDto line : lines){
+            System.out.println("\nRequesting data for line with name: " + line.name);
 
-            List<AggregatedMeasurement> measurements = getAggregatedMeasurementsForLine(accessToken, lineName);
+            List<AggregatedMeasurement> measurements = getAggregatedMeasurementsForLine(accessToken, line);
             for(AggregatedMeasurement measurement : measurements) {
                 System.out.println(measurement.toString());
             }
             System.out.println("Measurements found in the last week: " + measurements.size());                
             
-            List<DynamicLineRating> dynamicLineRatings = getDynamicLineRatingsForLine(accessToken, lineName, DLRType.HP);
+            List<DynamicLineRating> dynamicLineRatings = getDynamicLineRatingsForLine(accessToken, line, DLRType.HP);
             for(DynamicLineRating dynamicLineRating : dynamicLineRatings) {
                 System.out.println(dynamicLineRating.toString());
             }
@@ -49,9 +49,9 @@ public class HeimdallApiService {
         }
     }
 
-    private List<String> getLineNames() throws IOException {
+    private List<LineDto> getLines() throws IOException {
         StringBuilder urlBuilder = new StringBuilder();
-        urlBuilder.append(apiUrl + "api/beta/lines");
+        urlBuilder.append(apiUrl + "api/v1/lines");
         System.out.println("Sending request to url: " + urlBuilder.toString());
         URL url = new URL(urlBuilder.toString());
         
@@ -76,14 +76,13 @@ public class HeimdallApiService {
             
             Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'").create();
             LineResponse lineResponse = gson.fromJson(response.toString(),LineResponse.class);
-            List<LineDto> lineDtos = lineResponse.data;
+            
+            ;
+            System.out.println(prettifyJsonString(response.toString()));
+            System.out.println("\nRequest data with the ids of lines, spans, and span phases");
 
-            for(LineDto lineDto : lineDtos) {
-                System.out.println("Found line "+ lineDto.toString() + "\n");
-            }
-
-            List<String> lineNames = lineDtos.stream().map(lineDto -> lineDto.name).collect(Collectors.toList());
-            return lineNames;
+            List<LineDto> lines = lineResponse.data;
+            return lines;
         } else {
             StringBuilder errorResponse;
             try(BufferedReader in = new BufferedReader(
@@ -109,12 +108,12 @@ public class HeimdallApiService {
         }
     }
 
-    private List<AggregatedMeasurement> getAggregatedMeasurementsForLine(String accessToken, String lineName) throws IOException {
+    private List<AggregatedMeasurement> getAggregatedMeasurementsForLine(String accessToken, LineDto line) throws IOException {
 
         Date toDate = new Date(System.currentTimeMillis());
         Date fromDate = new Date((long) (System.currentTimeMillis() - (7 * 8.64e+7))); // 8.64e+7 = 1 day in milliseconds
 
-        String endpointUrl = apiUrl + "api/beta/aggregated-measurements";
+        String endpointUrl = apiUrl + "api/v1/aggregated-measurements";
         StringBuilder paramsBuilder = new StringBuilder();
         paramsBuilder
             // You can also use the more detailed format: yyyy-MM-dd'T'HH:mm:ss'Z'
@@ -123,7 +122,7 @@ public class HeimdallApiService {
             .append("&measurementType=" + MeasurementType.Current)
             .append("&aggregationType=" + AggregationType.Max)
             .append("&intervalDuration=" + IntervalDuration.EveryDay)
-            .append("&lineName=" + URLEncoder.encode(lineName, "UTF-8"));
+            .append("&lineId=" + line.id.toString());
 
 
         String encodedUrl  = endpointUrl + paramsBuilder.toString();
@@ -179,7 +178,7 @@ public class HeimdallApiService {
         }
     }      
     
-    private List<DynamicLineRating> getDynamicLineRatingsForLine(String accessToken, String lineName, DLRType dlrType) throws IOException {
+    private List<DynamicLineRating> getDynamicLineRatingsForLine(String accessToken, LineDto line, DLRType dlrType) throws IOException {
 
         Date toDate = new Date(System.currentTimeMillis());
         Date fromDate = new Date((long) (System.currentTimeMillis() - (7 * 8.64e+7))); // 8.64e+7 = 1 day in milliseconds
@@ -192,7 +191,7 @@ public class HeimdallApiService {
             .append("&toDateTime=" + toDate.toString())
             .append("&dlrType=" + dlrType)
             .append("&intervalDuration=" + IntervalDuration.EveryDay)
-            .append("&lineName=" + URLEncoder.encode(lineName, "UTF-8"));
+            .append("&lineName=" + URLEncoder.encode(line.name, "UTF-8"));
 
 
         String encodedUrl  = endpointUrl + paramsBuilder.toString();

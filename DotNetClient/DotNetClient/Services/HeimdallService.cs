@@ -27,19 +27,19 @@ namespace DotNetClient.Services
             toDate = DateTime.Now;
             fromDate = DateTime.Now.AddDays(-7); 
 
-            var lineNames = await GetLineNames();
-            if (!lineNames.Any())
+            var lines = await GetLines();
+            if (!lines.Any())
                 Console.WriteLine("Didn't find any lines");
-            foreach(var lineName in lineNames)
+            foreach(var line in lines)
             {
-                await GetAggregatedMeasurementsForLine(lineName);
-                await GetDynamicLineRatingsForLine(lineName);
+                await GetAggregatedMeasurementsForLine(line);
+                await GetDynamicLineRatingsForLine(line);
             }
         }
 
-        public async Task<List<string>> GetLineNames()
+        public async Task<List<LineDto>> GetLines()
         {
-            var response = await heimdallClient.GetAsync("api/beta/lines");
+            var response = await heimdallClient.GetAsync("api/v1/lines");
             Console.WriteLine($"Response: {response}");
 
             var jsonString = await response.Content.ReadAsStringAsync();
@@ -47,38 +47,30 @@ namespace DotNetClient.Services
             if (response.IsSuccessStatusCode)
             {
                 var linesResponse = JsonConvert.DeserializeObject<LineResponse>(jsonString);
-
-                foreach (var lineDto in linesResponse.data)
-                {
-                    Console.WriteLine($"You can request data for line: {lineDto.name}\n" +
-                                      $"Owner: {lineDto.owner}\n" +
-                                      $"Line spans in line:\n{string.Join("\n", lineDto.lineSpans.Select(lineSpan => lineSpan.name))}\n");
-                }
-                var lineNames = linesResponse.data.Select(line => line.name).ToList();
-                return lineNames;
+                Console.WriteLine($"Use ids from this response to request Data\n{JsonConvert.SerializeObject(linesResponse.Data, Formatting.Indented)}\n");
+                return linesResponse.Data;
             }
             else
             {
                 dynamic parsedJson = JsonConvert.DeserializeObject(jsonString);
                 var exceptionString = JsonConvert.SerializeObject(parsedJson, Formatting.Indented);
                 Console.WriteLine($"Lines request failed, exception: {exceptionString}");
-                return new List<string>();
+                return new List<LineDto>();
             }
         }
 
-        public async Task GetAggregatedMeasurementsForLine(string lineName)
+        public async Task GetAggregatedMeasurementsForLine(LineDto line)
         {
-            Console.WriteLine($"Requesting measurements for line: {lineName}");
+            Console.WriteLine($"Requesting measurements for line: {line.Name}");
 
             var dateFormat = "yyyy-MM-ddThh:mm:ss.fffZ";
-            // By including the optional lineSpanName
-            var url = "api/beta/aggregated-measurements?" +
+            var url = "api/v1/aggregated-measurements?" +
                       $"fromDateTime={fromDate.ToString(dateFormat)}&" +
                       $"toDateTime={toDate.ToString(dateFormat)}&" +
                       $"intervalDuration={IntervalDuration.EveryDay}&" +
                       $"measurementType={MeasurementType.Current}&" +
                       $"aggregationType={AggregationType.Max}&" +
-                      $"lineName={lineName}";
+                      $"lineId={line.Id}";
 
             Console.WriteLine($"Sending request to {heimdallClient.BaseAddress}{url}");
 
@@ -89,13 +81,13 @@ namespace DotNetClient.Services
 
             if (response.IsSuccessStatusCode)
             {
-                var measurementResponse = JsonConvert.DeserializeObject<ApiResponse<AggregatedMeasurementDto>>(jsonString);
-
-                foreach (var measurement in measurementResponse.data)
+                var measurementResponse = JsonConvert.DeserializeObject<ApiResponse<AggregatedFloatValueDto>>(jsonString);
+                var measurements = measurementResponse.Data;
+                foreach (var measurement in measurements)
                 {
-                    Console.WriteLine($"Current at {DateTime.Parse(measurement.intervalStartTime)}: {measurement.value} A\n");
+                    Console.WriteLine($"Current at {measurement.IntervalStartTime}: {measurement.Value} A\n");
                 }
-                Console.WriteLine($"Measurement response: {measurementResponse.message} - found {measurementResponse.data.Count} measurements");
+                Console.WriteLine($"Measurement response: {measurementResponse.Message} - found {measurements.Count} measurements");
             }
             else
             {
@@ -105,9 +97,9 @@ namespace DotNetClient.Services
             }
         }
 
-        public async Task GetDynamicLineRatingsForLine(string lineName, DLRType dlrType = DLRType.HP)
+        public async Task GetDynamicLineRatingsForLine(LineDto line, DLRType dlrType = DLRType.HP)
         {
-            Console.WriteLine($"\nRequesting DLR for line: {lineName}");
+            Console.WriteLine($"\nRequesting DLR for line: {line.Name}");
 
             var dateFormat = "yyyy-MM-ddThh:mm:ss.fffZ";
             // By including the optional lineSpanName
@@ -116,7 +108,7 @@ namespace DotNetClient.Services
                       $"toDateTime={toDate.ToString(dateFormat)}&" +
                       $"intervalDuration={IntervalDuration.EveryDay}&" +
                       $"dlrType={dlrType}&" +
-                      $"lineName={lineName}";
+                      $"lineName={line.Name}";
 
             Console.WriteLine($"Sending request to {heimdallClient.BaseAddress}{url}");
 
@@ -129,11 +121,11 @@ namespace DotNetClient.Services
             {
                 var measurementResponse = JsonConvert.DeserializeObject<ApiResponse<DynamicLineRatingDto>>(jsonString);
 
-                foreach (var dynamicLineRating in measurementResponse.data)
+                foreach (var dynamicLineRating in measurementResponse.Data)
                 {
-                    Console.WriteLine($"Dynamic line rating at {DateTime.Parse(dynamicLineRating.intervalStartTime)}: {dynamicLineRating.ampacity} A\n");
+                    Console.WriteLine($"Dynamic line rating at {DateTime.Parse(dynamicLineRating.IntervalStartTime)}: {dynamicLineRating.Ampacity} A\n");
                 }
-                Console.WriteLine($"DLR response: {measurementResponse.message} - found {measurementResponse.data.Count} DLRs");
+                Console.WriteLine($"DLR response: {measurementResponse.Message} - found {measurementResponse.Data.Count} DLRs");
             }
             else
             {

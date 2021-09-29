@@ -27,6 +27,9 @@ It gives information about
 
 ## Updates
 
+**1.10.21** 
+* Use the new V1 version of the Heimdall Cloud API
+
 **15.9.21** 
 * Use the new scope of the Heimdall Cloud API
 

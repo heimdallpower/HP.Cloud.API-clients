@@ -53,17 +53,17 @@ def getAccessToken(clientID, scope, authority, thumbprint, certfile):
 
 def getDecodedToken(accessToken):
     decodedAccessToken = jwt.decode(accessToken, options={'verify_signature': False})
-    accessTokenFormatted = json.dumps(decodedAccessToken, indent=2)
+    accessTokenFormatted = json.dumps(decodedAccessToken, indent=4)
     print('Token claims', accessTokenFormatted)
     return decodedAccessToken
 
-def getLineNames():
+def getLines():
     requestHeaders = {
         'Authorization': 'Bearer ' + tokenResponse['access_token'],
         'accept': 'text/plain'
     }
 
-    url = apiUrl + 'api/beta/lines'
+    url = apiUrl + 'api/v1/lines'
 
     try:
         print('Sending request: ', url,'\n')
@@ -76,15 +76,14 @@ def getLineNames():
 
         lines = responseInJson['data']
 
-        for line in lines:
-            print('You can request data for the following lines and line spans:\nName: {}\nOwner: {}\nLine spans in line: {}\n'.format(line['name'], line['owner'], line['lineSpans']))
-
         print('Message: {}. Found {} lines'.format(responseInJson['message'], len(lines)))
+        print(json.dumps(lines, indent=4), '\nRequest data with the ids of lines, spans, and span phases\n')
+
         return lines
     except Exception as error:
         print('Exception occured', error)
 
-def getAggregatedCurrentForLine(lineName):
+def getAggregatedCurrentForLine(line):
     requestHeaders = {
         'Authorization': 'Bearer ' + tokenResponse['access_token'],
         'accept': 'text/plain'
@@ -94,18 +93,18 @@ def getAggregatedCurrentForLine(lineName):
     toDate = datetime.utcnow().astimezone()
     fromDate = datetime.utcnow().astimezone() - timedelta(days=7)
 
-    url = '{}api/beta/aggregated-measurements?fromDateTime={}&toDateTime={}&lineName={}&aggregationType={}&intervalDuration={}&measurementType={}'.format(
+    url = '{}api/v1/aggregated-measurements?fromDateTime={}&toDateTime={}&lineId={}&aggregationType={}&intervalDuration={}&measurementType={}'.format(
         apiUrl, 
         getDateTimeStringForApi(fromDate), 
         getDateTimeStringForApi(toDate), 
-        urllib.parse.quote_plus(lineName, encoding='UTF-8'),
+        line['id'],
         AggregationType.MAX,
         IntervalDuration.EveryDay,
         MeasurementType.Current
     )
 
     try:
-        print('Sending request: ', url, '\n')
+        print('Sending aggregation request: ', url)
         response = requests.get(url, headers=requestHeaders)
         responseInJson = response.json()
 
@@ -126,7 +125,7 @@ def getAggregatedCurrentForLine(lineName):
     except Exception as error:
         print('Exception occured', error)
 
-def getDynamicLineRatingsForLine(lineName, dlrType):
+def getDynamicLineRatingsForLine(line, dlrType):
     requestHeaders = {
         'Authorization': 'Bearer ' + tokenResponse['access_token'],
         'accept': 'text/plain'
@@ -140,13 +139,13 @@ def getDynamicLineRatingsForLine(lineName, dlrType):
         apiUrl, 
         getDateTimeStringForApi(fromDate), 
         getDateTimeStringForApi(toDate), 
-        urllib.parse.quote_plus(lineName, encoding='UTF-8'),
+        urllib.parse.quote_plus(line['name'], encoding='UTF-8'),
         dlrType,
         IntervalDuration.EveryDay,
     )
 
     try:
-        print('Sending DLR request: ', url, '\n')
+        print('\nSending DLR request: ', url)
         response = requests.get(url, headers=requestHeaders)
         responseInJson = response.json()
 
@@ -190,14 +189,14 @@ try:
 
     # Get data from API
     if isTokenValid:
-        lineNames = getLineNames()
-        if len(lineNames) < 0:
+        lines = getLines()
+        if len(lines) < 0:
             print("Didn't find any lines")
         else:
-            chosenLineName = lineNames[0]['name']
-            print('Requesting aggregated current data for the line:', chosenLineName, '\n')
-            getAggregatedCurrentForLine(chosenLineName)
-            getDynamicLineRatingsForLine(chosenLineName, DLRType.HP)
+            chosenLine = lines[0]
+            print('Requesting aggregated current data for the line:', chosenLine['name'], '\n')
+            getAggregatedCurrentForLine(chosenLine)
+            getDynamicLineRatingsForLine(chosenLine, DLRType.HP)
         
     else:
         print('Need to get a new token')
