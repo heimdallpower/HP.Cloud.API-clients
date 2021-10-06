@@ -8,12 +8,4 @@ public class LineDto {
     public String name;
     public String owner;
     public List<SpanDto> spans;
-    
-    public String toString() {
-        return "\nId: " + id +
-            "\nName: " + name +
-            "\nOwner: " + owner +
-            "\nSpans in line: " + spans.size() + 
-            "\n" + spans;
-    }
 }

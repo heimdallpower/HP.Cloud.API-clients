@@ -36,15 +36,9 @@ public class HeimdallApiService {
             System.out.println("\nRequesting data for line with name: " + line.name);
 
             List<AggregatedMeasurement> measurements = getAggregatedMeasurementsForLine(accessToken, line);
-            for(AggregatedMeasurement measurement : measurements) {
-                System.out.println(measurement.toString());
-            }
             System.out.println("Measurements found in the last week: " + measurements.size());                
             
             List<DynamicLineRating> dynamicLineRatings = getDynamicLineRatingsForLine(accessToken, line, DLRType.HP);
-            for(DynamicLineRating dynamicLineRating : dynamicLineRatings) {
-                System.out.println(dynamicLineRating.toString());
-            }
             System.out.println("Dynamic line ratings found in the last week: " + measurements.size());
         }
     }
@@ -76,8 +70,6 @@ public class HeimdallApiService {
             
             Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'").create();
             LineResponse lineResponse = gson.fromJson(response.toString(),LineResponse.class);
-            
-            ;
             System.out.println(prettifyJsonString(response.toString()));
             System.out.println("\nRequest data with the ids of lines, spans, and span phases");
 
@@ -150,6 +142,7 @@ public class HeimdallApiService {
             }
             Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'").create();
             AggregatedMeasurementsResponse response = gson.fromJson(responseBuilder.toString(),AggregatedMeasurementsResponse.class);
+            System.out.println(prettifyJsonString(responseBuilder.toString()));
 
             return response.data;
         } else {
@@ -219,6 +212,7 @@ public class HeimdallApiService {
             }
             Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'").create();
             DynamicLineRatingResponse response = gson.fromJson(responseBuilder.toString(),DynamicLineRatingResponse.class);
+            System.out.println(prettifyJsonString(responseBuilder.toString()));
 
             return response.data;
         } else {
