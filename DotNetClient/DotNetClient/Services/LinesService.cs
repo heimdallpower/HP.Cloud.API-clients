@@ -13,14 +13,12 @@ namespace DotNetClient.Services
         public async Task<List<LineDto>> GetLines()
         {
             var response = await _heimdallClient.GetAsync(LinesEndpoint);
-            Console.WriteLine($"Response: {response}");
-
             var jsonString = await response.Content.ReadAsStringAsync();
 
             if (response.IsSuccessStatusCode)
             {
                 var linesResponse = JsonConvert.DeserializeObject<LineResponse>(jsonString);
-                Console.WriteLine($"Use ids from this response to request Data\n{JsonConvert.SerializeObject(linesResponse.Data, Formatting.Indented)}\n");
+                Console.WriteLine($"\nUse ids from this response to request Data\n{JsonConvert.SerializeObject(linesResponse.Data, Formatting.Indented)}\n");
                 return linesResponse.Data;
             }
             else

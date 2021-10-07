@@ -1,7 +1,6 @@
 ﻿using DotNetClient.Clients;
 using DotNetClient.Services;
 using System;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace DotNetClient

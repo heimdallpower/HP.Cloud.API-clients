@@ -12,7 +12,7 @@ namespace DotNetClient.Services
 
         public async Task GetDynamicLineRatingsForLine(LineDto line, DLRType dlrType = DLRType.HP)
         {
-            Console.WriteLine($"\nRequesting DLR for line: {line.Name}");
+            Console.WriteLine($"\nRequesting dynamic line ratings for line: {line.Name}");
 
             // By including the optional lineSpanName
             var url = $"{AggregatedDLREndpoint}?" +
@@ -22,22 +22,15 @@ namespace DotNetClient.Services
                       $"dlrType={dlrType}&" +
                       $"lineName={line.Name}";
 
-            Console.WriteLine($"Sending request to {_heimdallClient.BaseAddress}{url}");
-
             var response = await _heimdallClient.GetAsync(url);
 
             var jsonString = await response.Content.ReadAsStringAsync();
-            Console.WriteLine($"Response body: {jsonString}");
 
             if (response.IsSuccessStatusCode)
             {
-                var measurementResponse = JsonConvert.DeserializeObject<ApiResponse<DynamicLineRatingDto>>(jsonString);
-
-                foreach (var dynamicLineRating in measurementResponse.Data)
-                {
-                    Console.WriteLine($"Dynamic line rating at {DateTime.Parse(dynamicLineRating.IntervalStartTime)}: {dynamicLineRating.Ampacity} A\n");
-                }
-                Console.WriteLine($"DLR response: {measurementResponse.Message} - found {measurementResponse.Data.Count} DLRs");
+                var dlrResponse = JsonConvert.DeserializeObject<ApiResponse<DynamicLineRatingDto>>(jsonString);
+                Console.WriteLine($"{dlrResponse.Message} - found {dlrResponse.Data.Count} DLRs");
+                Console.WriteLine($"{jsonString}\n");
             }
             else
             {
