@@ -39,13 +39,13 @@ public class HeimdallApiService {
             System.out.println("Measurements found in the last week: " + measurements.size());                
             
             List<DynamicLineRating> dynamicLineRatings = getDynamicLineRatingsForLine(accessToken, line, DLRType.HP);
-            System.out.println("Dynamic line ratings found in the last week: " + measurements.size());
+            System.out.println("Dynamic line ratings found in the last week: " + dynamicLineRatings.size());
         }
     }
 
     private List<LineDto> getLines() throws IOException {
         StringBuilder urlBuilder = new StringBuilder();
-        urlBuilder.append(apiUrl + "api/v1/lines");
+        urlBuilder.append(apiUrl).append("api/v1/lines");
         System.out.println("Sending request to url: " + urlBuilder.toString());
         URL url = new URL(urlBuilder.toString());
         
