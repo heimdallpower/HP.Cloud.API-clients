@@ -11,7 +11,7 @@ namespace DotNetClient.Clients
 {
     public class HeimdallHttpClient
     {
-        protected HttpClient HttpClient { get; } = new HttpClient() { BaseAddress = new Uri(ApiUrl) };
+        protected HttpClient HttpClient { get; } = new () { BaseAddress = new Uri(ApiUrl) };
         private readonly string ClientID;
         private readonly string PfxCertificatePath;
         private readonly string CertificatePassword;

@@ -4,7 +4,7 @@ namespace DotNetClient.Entities
 {
     public class LineResponse
     {
-        public string message;
-        public List<LineDto> data;
+        public string Message;
+        public List<LineDto> Data;
     }
 }

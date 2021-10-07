@@ -1,16 +1,11 @@
 package Entities;
 
 import java.util.List;
+import java.util.UUID;
 
 public class LineDto {
+    public UUID id;
     public String name;
     public String owner;
-    public List<LineSpanDto> lineSpans;
-    
-    public String toString() {
-        return "\nName: " + name +
-            "\nOwner: " + owner +
-            "\nLinespans in line: " + lineSpans.size() + 
-            "\n" + lineSpans;
-    }
+    public List<SpanDto> spans;
 }
