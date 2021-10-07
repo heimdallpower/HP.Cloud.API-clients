@@ -18,8 +18,8 @@ namespace DotNetClient.Services
         public HeimdallService(HttpClient httpClient)
         {
             _heimdallClient = httpClient;
-            _toDate = DateTime.Now;
-            _fromDate = DateTime.Now.AddDays(-7); 
+            _toDate = DateTime.UtcNow;
+            _fromDate = DateTime.UtcNow.AddDays(-7); 
         }
 
         public async Task Run()
