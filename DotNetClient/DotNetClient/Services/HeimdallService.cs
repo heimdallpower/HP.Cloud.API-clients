@@ -14,6 +14,7 @@ namespace DotNetClient.Services
         private readonly HttpClient _heimdallClient;
         private readonly DateTime _toDate;
         private readonly DateTime _fromDate;
+        private const string DateFormat = "o";
 
         public HeimdallService(HttpClient httpClient)
         {

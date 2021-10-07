@@ -12,11 +12,10 @@ namespace DotNetClient.Services
         {
             Console.WriteLine($"\nRequesting DLR for line: {line.Name}");
 
-            var dateFormat = "yyyy-MM-ddThh:mm:ss.fffZ";
             // By including the optional lineSpanName
             var url = "api/beta/dlr/aggregated-dlr?" +
-                      $"fromDateTime={_fromDate.ToString(dateFormat)}&" +
-                      $"toDateTime={_toDate.ToString(dateFormat)}&" +
+                      $"fromDateTime={_fromDate.ToString(DateFormat)}&" +
+                      $"toDateTime={_toDate.ToString(DateFormat)}&" +
                       $"intervalDuration={IntervalDuration.EveryDay}&" +
                       $"dlrType={dlrType}&" +
                       $"lineName={line.Name}";

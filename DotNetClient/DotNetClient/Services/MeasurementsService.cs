@@ -12,10 +12,9 @@ namespace DotNetClient.Services
         {
             Console.WriteLine($"Requesting measurements for line: {line.Name}");
 
-            var dateFormat = "yyyy-MM-ddThh:mm:ss.fffZ";
             var url = "api/v1/aggregated-measurements?" +
-                      $"fromDateTime={_fromDate.ToString(dateFormat)}&" +
-                      $"toDateTime={_toDate.ToString(dateFormat)}&" +
+                      $"fromDateTime={_fromDate.ToString(DateFormat)}&" +
+                      $"toDateTime={_toDate.ToString(DateFormat)}&" +
                       $"intervalDuration={IntervalDuration.EveryDay}&" +
                       $"measurementType={MeasurementType.Current}&" +
                       $"aggregationType={AggregationType.Max}&" +
