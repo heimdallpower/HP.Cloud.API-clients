@@ -8,9 +8,11 @@ namespace DotNetClient.Services
 {
     public partial class HeimdallService
     {
+        private const string LinesEndpoint = "api/v1/lines";
+
         public async Task<List<LineDto>> GetLines()
         {
-            var response = await _heimdallClient.GetAsync("api/v1/lines");
+            var response = await _heimdallClient.GetAsync(LinesEndpoint);
             Console.WriteLine($"Response: {response}");
 
             var jsonString = await response.Content.ReadAsStringAsync();

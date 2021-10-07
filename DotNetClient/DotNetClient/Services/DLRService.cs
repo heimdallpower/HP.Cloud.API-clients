@@ -8,12 +8,14 @@ namespace DotNetClient.Services
 {
     public partial class HeimdallService
     {
+        private const string AggregatedDLREndpoint = "api/beta/dlr/aggregated-dlr";
+
         public async Task GetDynamicLineRatingsForLine(LineDto line, DLRType dlrType = DLRType.HP)
         {
             Console.WriteLine($"\nRequesting DLR for line: {line.Name}");
 
             // By including the optional lineSpanName
-            var url = "api/beta/dlr/aggregated-dlr?" +
+            var url = $"{AggregatedDLREndpoint}?" +
                       $"fromDateTime={_fromDate.ToString(DateFormat)}&" +
                       $"toDateTime={_toDate.ToString(DateFormat)}&" +
                       $"intervalDuration={IntervalDuration.EveryDay}&" +

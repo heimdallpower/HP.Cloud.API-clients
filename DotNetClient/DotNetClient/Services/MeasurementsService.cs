@@ -8,11 +8,13 @@ namespace DotNetClient.Services
 {
     public partial class HeimdallService
     {
+        private const string AggregatedMeasurementsEndpoint = "api/v1/aggregated-measurements";
+
         public async Task GetAggregatedMeasurementsForLine(LineDto line)
         {
             Console.WriteLine($"Requesting measurements for line: {line.Name}");
 
-            var url = "api/v1/aggregated-measurements?" +
+            var url = $"{AggregatedMeasurementsEndpoint}?" +
                       $"fromDateTime={_fromDate.ToString(DateFormat)}&" +
                       $"toDateTime={_toDate.ToString(DateFormat)}&" +
                       $"intervalDuration={IntervalDuration.EveryDay}&" +
