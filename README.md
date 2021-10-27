@@ -27,6 +27,10 @@ It gives information about
 
 ## Updates
 
+**27.10.21** 
+* Support usage of the developer API for testing purposes
+* Output formatting improvements
+
 **1.10.21** 
 * Use the new V1 version of the Heimdall Cloud API
 
