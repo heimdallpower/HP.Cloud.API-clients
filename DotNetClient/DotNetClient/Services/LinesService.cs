@@ -18,7 +18,7 @@ namespace DotNetClient.Services
             if (response.IsSuccessStatusCode)
             {
                 var linesResponse = JsonConvert.DeserializeObject<LineResponse>(jsonString);
-                Console.WriteLine($"\nUse ids from this response to request Data\n{JsonConvert.SerializeObject(linesResponse.Data, Formatting.Indented)}\n");
+                Console.WriteLine($"\n{JsonConvert.SerializeObject(linesResponse.Data, Formatting.Indented)}\n\nRequest data with the ids of lines, spans, and span phases from the response above\n");
                 return linesResponse.Data;
             }
             else

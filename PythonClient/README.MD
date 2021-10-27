@@ -16,6 +16,7 @@ requests                2.23.0
 2. Set the `clientId` property to the application/client ID value you received earlier
 3. Set the `thumbprint` property to the thumbprint of the certificate
 4. Set the `pathToCertificatePrivateKey` property to the path to the .pem private key you generated or received earlier (include file extension)
+4. Set the `useDeveloperApi` property to false if you want production data
 
 # Run
 

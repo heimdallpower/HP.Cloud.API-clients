@@ -46,7 +46,7 @@ public class HeimdallApiService {
     private List<LineDto> getLines() throws IOException {
         StringBuilder urlBuilder = new StringBuilder();
         urlBuilder.append(apiUrl).append("api/v1/lines");
-        System.out.println("Sending request to url: " + urlBuilder.toString());
+        System.out.println("\nSending request to url: " + urlBuilder.toString());
         URL url = new URL(urlBuilder.toString());
         
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -71,7 +71,7 @@ public class HeimdallApiService {
             Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'").create();
             LineResponse lineResponse = gson.fromJson(response.toString(),LineResponse.class);
             System.out.println(prettifyJsonString(response.toString()));
-            System.out.println("\nRequest data with the ids of lines, spans, and span phases");
+            System.out.println("\nRequest data with the ids of lines, spans, and span phases from the response above\n");
 
             List<LineDto> lines = lineResponse.data;
             return lines;
@@ -243,7 +243,7 @@ public class HeimdallApiService {
     
     private static String prettifyJsonString(String json){
         JsonParser parser = new JsonParser();
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        Gson gson = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
 
         JsonElement el = parser.parse(json);
         return gson.toJson(el);
