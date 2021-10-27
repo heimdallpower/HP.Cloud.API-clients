@@ -22,11 +22,11 @@ class CallHeimdallApi {
         loadProperties();
 
         try {
-            System.out.println("Hello Heimdall!");
+            System.out.println("\nHello Heimdall!\n");
 
             AccessTokenClient client = new AccessTokenClient(keyPath, certPath, clientId, authority, scope);
             String accessToken = client.getAccessToken();
-            System.out.println("Access token = " + accessToken);
+            System.out.println("\nAccess token = \n" + accessToken);
 
             HeimdallApiService service = new HeimdallApiService(accessToken, apiUrl);
             service.Run();

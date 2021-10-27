@@ -67,7 +67,7 @@ def getLines():
     url = apiUrl + 'api/v1/lines'
 
     try:
-        print('Sending request: ', url,'\n')
+        print('\nSending request: ', url,'\n')
         response = requests.get(url, headers=requestHeaders)
         responseInJson = response.json()
 
@@ -78,7 +78,7 @@ def getLines():
         lines = responseInJson['data']
 
         print('Message: {}. Found {} lines'.format(responseInJson['message'], len(lines)))
-        print(json.dumps(lines, indent=4), '\nRequest data with the ids of lines, spans, and span phases\n')
+        print(json.dumps(lines, indent=4), '\n\nRequest data with the ids of lines, spans, and span phases from the response above\n')
 
         return lines
     except Exception as error:
@@ -90,7 +90,6 @@ def getAggregatedCurrentForLine(line):
         'accept': 'text/plain'
     }
 
-    neuronId = 703
     toDate = datetime.utcnow().astimezone()
     fromDate = datetime.utcnow().astimezone() - timedelta(days=7)
 
@@ -132,7 +131,6 @@ def getDynamicLineRatingsForLine(line, dlrType):
         'accept': 'text/plain'
     }
 
-    neuronId = 703
     toDate = datetime.utcnow().astimezone()
     fromDate = datetime.utcnow().astimezone() - timedelta(days=7)
 
@@ -172,7 +170,7 @@ def getDateTimeStringForApi(datetime):
 
 try:
     try:
-        print('Hello Heimdall!')
+        print('\nHello Heimdall!\n')
         # Get a new Access Token using Client Credentials Flow and a certificate
         tokenResponse = getAccessToken(clientID, scope, authority, thumbprint, pathToCertificatePrivateKey)
 
@@ -191,7 +189,7 @@ try:
     # Get data from API
     if isTokenValid:
         lines = getLines()
-        if len(lines) < 0:
+        if len(lines) < 1:
             print("Didn't find any lines")
         else:
             chosenLine = lines[0]

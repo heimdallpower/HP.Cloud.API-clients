@@ -31,7 +31,7 @@ namespace DotNetClient
                 heimdallHttpClient = new HeimdallHttpClient(ClientId, PfxCertificatePath, CertificatePassword, UseDeveloperApi);
             }
 
-            Console.WriteLine("Hello Heimdall!");
+            Console.WriteLine("Hello Heimdall!\n");
 
 
             var heimdallClient = await heimdallHttpClient.GetHttpClient();
