@@ -8,6 +8,7 @@
 4. Right click certificate --> properties --> set "Copy to output folder: always"
 5. Set the `PfxCertificatePath` property to the relative path to the .pfx certificate (include file extension)
 6. Set the `CertificatePassword` property
+7. Set the `useDeveloperApi` property to false if you want production data
 
 # Run
 Option 1: Open the solution in Visual Studio and run the application.

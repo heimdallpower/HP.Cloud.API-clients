@@ -8,6 +8,7 @@ Java
 2. Set the `CLIENT_ID` property to the application/client ID value you received earlier
 3. Set the `PKCS8_PRIVATE_KEY_PATH` property to the path to the PKCS8 private key you generated or received earlier
 4. Set the `CRT_CERTIFICATE_PATH` property to the path to the .crt certificate you generated or received earlier
+5. Set the `useDeveloperApi` property to false if you want production data
 
 # Run
 
