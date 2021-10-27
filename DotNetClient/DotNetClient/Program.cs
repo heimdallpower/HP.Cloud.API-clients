@@ -10,20 +10,26 @@ namespace DotNetClient
         private const string ClientId = "INSERT_VARIABLE_HERE";
         private const string PfxCertificatePath = "INSERT_VARIABLE_HERE";
         private const string CertificatePassword = "INSERT_VARIABLE_HERE";
+        private const bool UseDeveloperApi = true;
 
         private static async Task Main(string[] args)
         {
-            if (!(args.Length == 0 || args.Length == 3))
+            if (!(args.Length == 0 || args.Length == 4))
             {
-                Console.WriteLine("Program only supports 0 or 3 arguments, argument order is: ClientId PfxCertificatePath CertificatePassword");
+                Console.WriteLine("Program only supports 0 or 4 arguments, argument order is: ClientId PfxCertificatePath CertificatePassword UseDeveloperApi");
                 return;
             }
 
             HeimdallHttpClient heimdallHttpClient;
-            if (args.Length == 3)
-                heimdallHttpClient = new HeimdallHttpClient(args[0], args[1], args[2]);
+            if (args.Length == 4)
+            {
+                var useDeveloperApi = bool.Parse(args[3]);
+                heimdallHttpClient = new HeimdallHttpClient(args[0], args[1], args[2], useDeveloperApi);
+            }
             else
-                heimdallHttpClient = new HeimdallHttpClient(ClientId, PfxCertificatePath, CertificatePassword);
+            {
+                heimdallHttpClient = new HeimdallHttpClient(ClientId, PfxCertificatePath, CertificatePassword, UseDeveloperApi);
+            }
 
             Console.WriteLine("Hello Heimdall!");
 

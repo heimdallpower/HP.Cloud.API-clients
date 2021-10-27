@@ -17,12 +17,13 @@ tokenExpiry = None
 clientID = 'INSERT_VARIABLE_HERE'
 thumbprint = 'INSERT_VARIABLE_HERE'
 pathToCertificatePrivateKey = '.\\INSERT_PATH_HERE.pem'
+useDeveloperApi = True
 
 # Other constants
 tenantID = '132d3d43-145b-4d30-aaf3-0a47aa7be073'
 authority = 'https://login.microsoftonline.com/' + tenantID
-scope = ['aac6dec0-4c1b-4565-a825-5bb9401a1547/.default']
-apiUrl = 'https://api.heimdallcloud.com/'
+scope =  ['6b9ba5c0-4a21-4263-bbf5-8c4e30c0ee1b/.default'] if useDeveloperApi else ['aac6dec0-4c1b-4565-a825-5bb9401a1547/.default']
+apiUrl = 'https://api.heimdallcloud-dev.com/' if useDeveloperApi else 'https://api.heimdallcloud.com/'
 
 class MeasurementType(str, Enum):
     Current = 'Current'
