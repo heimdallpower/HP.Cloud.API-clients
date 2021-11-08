@@ -5,7 +5,7 @@
 This repository provides three sample client implementations in different languages that calls the Heimdall Cloud API as a service daemon application. Follow the `README` in each client to get started.
 
 Client types
-* .Net 5 console application
+* .Net 5 console application (uses the `HeimdallPower.CloudApi.Client` [nuget package](https://www.nuget.org/packages/HeimdallPower.CloudApi.Client/))
 * Java application
 * Python script
 
@@ -25,6 +25,9 @@ It gives information about
 	* Click `authorize` and log in to the same account you use to login to the [cloud app](https://heimdallcloud.com/)
 
 ## Updates
+
+**8.11.21** 
+* Use HeimdallPower.CloudApi.Client nuget package in .NET client
 
 **27.10.21** 
 * Support usage of the developer API for testing purposes
