@@ -1,7 +1,9 @@
-﻿using DotNetClient.Clients;
-using DotNetClient.Services;
-using System;
+﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
+using HeimdallPower;
+using HeimdallPower.Enums;
+using Newtonsoft.Json;
 
 namespace DotNetClient
 {
@@ -16,30 +18,39 @@ namespace DotNetClient
         {
             if (!(args.Length == 0 || args.Length == 4))
             {
-                Console.WriteLine("Program only supports 0 or 4 arguments, argument order is: ClientId PfxCertificatePath CertificatePassword UseDeveloperApi");
+                Console.WriteLine("Program only supports 0 or 4 arguments, argument order is: ClientId UseDeveloperApi PfxCertificatePath CertificatePassword");
                 return;
             }
 
-            HeimdallHttpClient heimdallHttpClient;
+            CloudApiClient cloudApiClient;
             if (args.Length == 4)
             {
-                var useDeveloperApi = bool.Parse(args[3]);
-                heimdallHttpClient = new HeimdallHttpClient(args[0], args[1], args[2], useDeveloperApi);
+                var useDeveloperApi = bool.Parse(args[1]);
+                cloudApiClient = new CloudApiClient(args[0], useDeveloperApi, args[2], args[3]);
             }
             else
             {
-                heimdallHttpClient = new HeimdallHttpClient(ClientId, PfxCertificatePath, CertificatePassword, UseDeveloperApi);
+                cloudApiClient = new CloudApiClient(ClientId, UseDeveloperApi, PfxCertificatePath, CertificatePassword);
             }
 
             Console.WriteLine("Hello Heimdall!\n");
 
+            var lines = await cloudApiClient.GetLines();
+            Console.WriteLine($"\n{JsonConvert.SerializeObject(lines, Formatting.Indented)}\n\nRequest data with the ids of lines, spans, and span phases from the response above\n");
 
-            var heimdallClient = await heimdallHttpClient.GetHttpClient();
+            if (!lines.Any())
+                Console.WriteLine("Didn't find any lines");
 
-            // Create a http client which forwards the access token to the Heimdall API. For production usage of HttpClient, see this https://docs.microsoft.com/en-us/dotnet/architecture/microservices/implement-resilient-applications/use-httpclientfactory-to-implement-resilient-http-requests
-            var service = new HeimdallService(heimdallClient);
+            var toDate = DateTime.UtcNow;
+            var fromDate = DateTime.UtcNow.AddDays(-3);
+            foreach (var line in lines)
+            {
+                var measurements = await cloudApiClient.GetAggregatedMeasurements(line, null, fromDate, toDate, IntervalDuration.EveryDay, MeasurementType.Current, AggregationType.Average);
+                Console.WriteLine($"\nMeasurements for {line.Name}\n{JsonConvert.SerializeObject(measurements, Formatting.Indented)}");
 
-            await service.Run();
+                var dynamicLineRatings = await cloudApiClient.GetAggregatedDlr(line, fromDate, toDate, DLRType.Cigre, IntervalDuration.EveryDay);
+                Console.WriteLine($"\nDynamic line ratings for {line.Name}\n{JsonConvert.SerializeObject(dynamicLineRatings, Formatting.Indented)}");
+            }
         }
     }
 }
