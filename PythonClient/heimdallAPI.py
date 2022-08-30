@@ -13,23 +13,22 @@ logging.basicConfig(filename="PythonClient/PythonClientLogger.log", encoding= "u
 
 class HeimdallAPI:
     TENANT_ID = "132d3d43-145b-4d30-aaf3-0a47aa7be073"
-    AUTHORITY = f"https://login.microsoftonline.com/{TENANT_ID}"
-    USE_DEVELOPER_API = True
-    SCOPE = ['6b9ba5c0-4a21-4263-bbf5-8c4e30c0ee1b/.default'] if USE_DEVELOPER_API else ['aac6dec0-4c1b-4565-a825-5bb9401a1547/.default']
-    API_URL = "https://api.heimdallcloud-dev.com" if USE_DEVELOPER_API else "https://api.heimdallcloud.com"
     
-    def __init__(self, client_id: str, thumbprint: str, path_to_certificate: str) -> None:
+    def __init__(self, client_id: str, thumbprint: str, path_to_certificate: str, use_dev_api : bool = True) -> None:
         self.client_id = client_id
         self.thumbprint = thumbprint
         self.path_to_certificate = path_to_certificate
-        self.access_token = self.get_access_token()["access_token"]
-        self.decoded_token = self.get_decoded_token()
+        self.api_url = "https://api.heimdallcloud-dev.com" if use_dev_api else "https://api.heimdallcloud.com"
+        self.scope = ['6b9ba5c0-4a21-4263-bbf5-8c4e30c0ee1b/.default'] if use_dev_api else ['aac6dec0-4c1b-4565-a825-5bb9401a1547/.default']
+        self.authority = f"https://login.microsoftonline.com/{self.TENANT_ID}"
         self.requestHeaders = {
                                 'Authorization': 'Bearer ' + self.access_token,
                                 'accept': 'text/plain'
                               }
+        #data grepping functions
+        self.access_token = self.get_access_token()["access_token"]
+        self.decoded_token = self.get_decoded_token()
         self.lines = self.get_lines()
-
         self.get_aggregated_current_for_line(45)
         self.get_dlr_for_line(45, DLRType.HP)
         
@@ -46,8 +45,8 @@ class HeimdallAPI:
         }
         
         try:
-            client_app = msal.ConfidentialClientApplication(self.client_id, authority=self.AUTHORITY, client_credential=client_credential)
-            client_token = client_app.acquire_token_for_client(scopes=self.SCOPE)
+            client_app = msal.ConfidentialClientApplication(self.client_id, authority=self.authority, client_credential=client_credential)
+            client_token = client_app.acquire_token_for_client(scopes=self.scope)
             if ("error" or "error_description") in client_token:
                 raise IncorrectAccessTokenError
             
@@ -75,7 +74,7 @@ class HeimdallAPI:
         return decoded_token
     
     def get_lines(self) -> list:
-        url = f"{self.API_URL}/api/v1/lines"
+        url = f"{self.api_url}/api/v1/lines"
         try:
             logging.info(f"Sending request to {url}")
             response = requests.get(url, headers=self.requestHeaders)
@@ -109,7 +108,7 @@ class HeimdallAPI:
         to_date = datetime.utcnow().astimezone().strftime('%Y-%m-%dT%H:%M:%S.%f')+'Z'
 
         url = "{}/api/v1/aggregated-measurements?fromDateTime={}&toDateTime={}&lineId={}&aggregationType={}&intervalDuration={}&measurementType={}".format(
-                    self.API_URL,
+                    self.api_url,
                     from_date,
                     to_date,
                     chosen_line["id"],
@@ -154,7 +153,7 @@ class HeimdallAPI:
         to_date = datetime.utcnow().astimezone().strftime('%Y-%m-%dT%H:%M:%S.%f')+'Z'
 
         url = '{}/api/beta/dlr/aggregated-dlr?fromDateTime={}&toDateTime={}&lineName={}&dlrType={}&intervalDuration={}'.format(
-                    self.API_URL,
+                    self.api_url,
                     from_date,
                     to_date, 
                     urllib.parse.quote_plus(chosen_line['name'], encoding='UTF-8'),
