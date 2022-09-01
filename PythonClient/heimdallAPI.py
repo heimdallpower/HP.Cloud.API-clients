@@ -71,6 +71,7 @@ class HeimdallAPI:
         except Exception as error:
             logging.error(f"{error}")
             logging.error("*"*65)
+
         return decoded_token
     
     def get_lines(self) -> list:
@@ -94,9 +95,10 @@ class HeimdallAPI:
         except Exception as error:
             logging.error(f"{error}")
             logging.error("*"*65)
+
         return lines
     
-    def get_aggregated_current_for_line(self, line_index: int):
+    def get_aggregated_current_for_line(self, line_index: int) -> None:
         if not self.lines:
             logging.error("No lines were returned")
             logging.error("*"*65)
@@ -141,7 +143,7 @@ class HeimdallAPI:
             logging.error(f"{error}")
             logging.error("*"*65)
 
-    def get_dlr_for_line(self, line_index: int, dlr_type: Enum):
+    def get_dlr_for_line(self, line_index: int, dlr_type: Enum) -> None:
         if not self.lines:
             logging.error("No lines were returned")
             logging.error("*"*65)

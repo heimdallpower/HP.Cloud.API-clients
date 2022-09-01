@@ -13,9 +13,9 @@ requests                2.23.0
 
 # Setup
 1. Open [`main.py`](main.py)
-2. Set the `clientId` property to the application/client ID value you received earlier
+2. Set the `client_id` property to the application/client ID value you received earlier
 3. Set the `thumbprint` property to the thumbprint of the certificate
-4. Set the `pathToCertificatePrivateKey` property to the path to the .pem private key you generated or received earlier (include file extension)
+4. Set the `path_to_certificate_private_key` property to the path to the .pem private key you generated or received earlier (include file extension)
 4. Set the `useDeveloperApi` property to false if you want production data
 
 # Run
