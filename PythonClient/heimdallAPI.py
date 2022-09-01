@@ -21,19 +21,17 @@ class HeimdallAPI:
         self.api_url = "https://api.heimdallcloud-dev.com" if use_dev_api else "https://api.heimdallcloud.com"
         self.scope = ['6b9ba5c0-4a21-4263-bbf5-8c4e30c0ee1b/.default'] if use_dev_api else ['aac6dec0-4c1b-4565-a825-5bb9401a1547/.default']
         self.authority = f"https://login.microsoftonline.com/{self.TENANT_ID}"
+        
+        self.access_token = self.get_access_token()["access_token"]
         self.requestHeaders = {
                                 'Authorization': 'Bearer ' + self.access_token,
                                 'accept': 'text/plain'
                               }
-        #data grepping functions
-        self.access_token = self.get_access_token()["access_token"]
         self.decoded_token = self.get_decoded_token()
         self.lines = self.get_lines()
-        self.get_aggregated_current_for_line(45)
-        self.get_dlr_for_line(45, DLRType.HP)
-        
-        logging.error("*"*65)
 
+    
+        
     def get_access_token(self) -> dict:
         with open(self.path_to_certificate, "r") as certificate_file:
             private_key = certificate_file.read()
