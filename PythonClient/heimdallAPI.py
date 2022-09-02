@@ -30,8 +30,6 @@ class HeimdallAPI:
         self.decoded_token = self.get_decoded_token()
         self.lines = self.get_lines()
 
-    
-        
     def get_access_token(self) -> dict:
         with open(self.path_to_certificate, "r") as certificate_file:
             private_key = certificate_file.read()
