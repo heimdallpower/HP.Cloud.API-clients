@@ -12,12 +12,14 @@ requests                2.23.0
 ```
 
 # Setup
-1. Open [`callHeimdallApi.py`](callHeimdallApi.py)
-2. Set the `clientId` property to the application/client ID value you received earlier
+1. Open [`main.py`](main.py)
+2. Set the `client_id` property to the application/client ID value you received earlier
 3. Set the `thumbprint` property to the thumbprint of the certificate
-4. Set the `pathToCertificatePrivateKey` property to the path to the .pem private key you generated or received earlier (include file extension)
-4. Set the `useDeveloperApi` property to false if you want production data
+4. Set the `path_to_certificate_private_key` property to the path to the .pem private key you generated or received earlier (include file extension)
+4. Set the `use_dev_api` property to false if you want production data
 
 # Run
 
-Run the program with `python callHeimdallApi.py`
+Run the program with `python main.py`
+
+Debugging information will be displayed in PythonClient/PythonClientLogger.log file

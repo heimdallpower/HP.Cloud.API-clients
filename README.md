@@ -25,6 +25,8 @@ It gives information about
 	* Click `authorize` and log in to the same account you use to login to the [cloud app](https://heimdallcloud.com/)
 
 ## Updates
+**29.08.22** 
+* Restructured python client
 
 **8.11.21** 
 * Use HeimdallPower.CloudApi.Client nuget package in .NET client
