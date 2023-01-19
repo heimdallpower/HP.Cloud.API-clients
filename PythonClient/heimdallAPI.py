@@ -9,7 +9,10 @@ from datetime import datetime, timedelta
 from Enums.enums import MeasurementType, AggregationType, IntervalDuration, DLRType
 from CustomException.incorrectAccessTokenError import IncorrectAccessTokenError
 
-logging.basicConfig(filename="PythonClient/PythonClientLogger.log", encoding= "utf-8", format='%(asctime)s %(levelname)-8s %(message)s', level=logging.INFO)
+logging.basicConfig(filename="PythonClientLogger.log", encoding= "utf-8", format='%(asctime)s %(levelname)-8s %(message)s', level=logging.INFO)
+
+#SSL verify is set to False in requests, ignoring verbose messages
+requests.packages.urllib3.disable_warnings()
 
 class HeimdallAPI:
     TENANT_ID = "132d3d43-145b-4d30-aaf3-0a47aa7be073"
@@ -74,7 +77,7 @@ class HeimdallAPI:
         url = f"{self.api_url}/api/v1/lines"
         try:
             logging.info(f"Sending request to {url}")
-            response = requests.get(url, headers=self.requestHeaders)
+            response = requests.get(url, headers=self.requestHeaders,verify=False)
             response_json = response.json()
 
             if not response.ok:
@@ -110,13 +113,13 @@ class HeimdallAPI:
                     from_date,
                     to_date,
                     chosen_line["id"],
-                    AggregationType.MAX,
-                    IntervalDuration.EveryDay,
-                    MeasurementType.Current
+                    AggregationType.MAX.value,
+                    IntervalDuration.EveryDay.value,
+                    MeasurementType.Current.value
                 )
         try:
             logging.info(f"Sending request to {url}")
-            response = requests.get(url, headers=self.requestHeaders)
+            response = requests.get(url, headers=self.requestHeaders,verify=False)
             response_json = response.json()
 
             if not response.ok:
@@ -156,11 +159,11 @@ class HeimdallAPI:
                     to_date, 
                     urllib.parse.quote_plus(chosen_line['name'], encoding='UTF-8'),
                     dlr_type,
-                    IntervalDuration.EveryDay,
+                    IntervalDuration.EveryDay.value,
                 )
         try:
             logging.info(f"Sending request to {url}")
-            response = requests.get(url, headers=self.requestHeaders)
+            response = requests.get(url, headers=self.requestHeaders,verify=False)
             response_json = response.json()
 
             if not response.ok:

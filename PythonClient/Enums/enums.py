@@ -6,6 +6,7 @@ class MeasurementType(str, Enum):
 
 class IntervalDuration(str, Enum):
     Every5Minutes = 'PT5M'
+    Every1Minutes = 'PT1M'
     EveryDay = 'P1D'
 
 class AggregationType(str, Enum):
