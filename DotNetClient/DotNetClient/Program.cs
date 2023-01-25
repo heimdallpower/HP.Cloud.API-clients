@@ -5,11 +5,11 @@ using HeimdallPower;
 using HeimdallPower.Enums;
 using Newtonsoft.Json;
 
-string ClientId = "INSERT_VARIABLE_HERE";
-string ClientSecret = "INSERT_VARIABLE_HERE";
+string ClientId = "INSERT CLIENT ID HERE";
+string ClientSecret = "INSERT CLIENT SECRET HERE";
 bool UseDeveloperApi = true;
 
-CloudApiClient cloudApiClient = new CloudApiClient(ClientId, ClientSecret, UseDeveloperApi);
+CloudApiClient cloudApiClient = new(ClientId, ClientSecret, UseDeveloperApi);
 
 Console.WriteLine("Hello Heimdall!\n");
 
