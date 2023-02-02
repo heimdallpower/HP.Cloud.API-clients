@@ -5,11 +5,11 @@
 This repository provides three sample client implementations in different languages that calls the Heimdall Cloud API as a service daemon application. Follow the `README` in each client to get started.
 
 Client types
-* .Net 5 console application (uses the `HeimdallPower.CloudApi.Client` [nuget package](https://www.nuget.org/packages/HeimdallPower.CloudApi.Client/))
+* .Net 7 console application (uses the `HeimdallPower.CloudApi.Client` [nuget package](https://www.nuget.org/packages/HeimdallPower.CloudApi.Client/))
 * Java application
 * Python script
 
-Each client authenticates with the `OAuth 2.0 client credentials flow` using certificates
+Each client authenticates with the `OAuth 2.0 client credentials flow` using client secrets
 * First the client obtains an `access token`
 * Each token permits the client to consume the Heimdall API for one hour
 * Secondly the client calls the Heimdall API to get the connected to this application
@@ -25,6 +25,10 @@ It gives information about
 	* Click `authorize` and log in to the same account you use to login to the [cloud app](https://heimdallcloud.com/)
 
 ## Updates
+**02.02.23**
+* Updated API clients to use Azure Active Directory B2C authentication
+* NB! This authentication framework does not support certificates, and requires client application to authenticate using client secrets.
+
 **29.08.22** 
 * Restructured python client
 
