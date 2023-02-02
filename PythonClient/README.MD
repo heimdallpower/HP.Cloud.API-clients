@@ -14,8 +14,7 @@ requests                2.23.0
 # Setup
 1. Open [`main.py`](main.py)
 2. Set the `client_id` property to the application/client ID value you received earlier
-3. Set the `thumbprint` property to the thumbprint of the certificate
-4. Set the `path_to_certificate_private_key` property to the path to the .pem private key you generated or received earlier (include file extension)
+3. Set the `client_secret` property to the client secret provided by Heimdall Power, corresponding to the application client id
 4. Set the `use_dev_api` property to false if you want production data
 
 # Run

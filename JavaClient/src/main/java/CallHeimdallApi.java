@@ -12,9 +12,12 @@ class CallHeimdallApi {
 
     private static String authority;
     private static String clientId;
+    private static String clientSecret;
+    private static String backendClientId;
+    private static String policy;
     private static String scope;
-    private static String keyPath;
-    private static String certPath;
+    private static String instance;
+    private static String domain;
     private static String apiUrl;
 
     public static void main(String args[]) throws Exception{
@@ -24,7 +27,7 @@ class CallHeimdallApi {
         try {
             System.out.println("\nHello Heimdall!\n");
 
-            AccessTokenClient client = new AccessTokenClient(keyPath, certPath, clientId, authority, scope);
+            AccessTokenClient client = new AccessTokenClient(clientId, clientSecret, authority, scope);
             String accessToken = client.getAccessToken();
             System.out.println("\nAccess token = \n" + accessToken);
 
@@ -49,18 +52,25 @@ class CallHeimdallApi {
         // Load properties file and set properties used throughout the sample
         Properties properties = new Properties();
         properties.load(Thread.currentThread().getContextClassLoader().getResourceAsStream("application.properties"));
-        authority = "https://login.microsoftonline.com/132d3d43-145b-4d30-aaf3-0a47aa7be073/";
         clientId = properties.getProperty("CLIENT_ID");
-        keyPath = properties.getProperty("PKCS8_PRIVATE_KEY_PATH");
-        certPath = properties.getProperty("CRT_CERTIFICATE_PATH");
+        clientSecret = properties.getProperty("CLIENT_SECRET");
+        policy = properties.getProperty("POLICY");
 
         Boolean useDeveloperApi = Boolean.parseBoolean(properties.getProperty("USE_DEVELOPER_API"));
 
-        scope = useDeveloperApi ? 
-            "6b9ba5c0-4a21-4263-bbf5-8c4e30c0ee1b/.default": 
-            "aac6dec0-4c1b-4565-a825-5bb9401a1547/.default";
+        instance = useDeveloperApi ? 
+            "https://hpadb2cdev.b2clogin.com" : 
+            "https://hpadb2cprod.b2clogin.com";
+        domain = useDeveloperApi ?
+            "hpadb2cdev.onmicrosoft.com" : 
+            "hpadb2cprod.onmicrosoft.com";
+        backendClientId = useDeveloperApi ? 
+            "f2fd8894-ae2e-4965-8318-e6c6781b5b80" : 
+            "dc5758ae-4eea-416e-9e61-812914d9a49a";
+        scope = String.format("https://%s/%s/.default", domain, backendClientId);
+        authority = String.format("%s/tfp/%s/%s", instance, domain, policy);
         apiUrl = useDeveloperApi ? 
-            "https://api.heimdallcloud-dev.com/": 
+            "https://api.heimdallcloud-dev.com/" : 
             "https://api.heimdallcloud.com/";
     }   
 }

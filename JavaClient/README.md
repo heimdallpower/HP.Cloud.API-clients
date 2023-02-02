@@ -6,9 +6,8 @@ Java
 
 1. Open the [`src\main\resources\application.properties`](src\main\resources\application.properties) class
 2. Set the `CLIENT_ID` property to the application/client ID value you received earlier
-3. Set the `PKCS8_PRIVATE_KEY_PATH` property to the path to the PKCS8 private key you generated or received earlier
-4. Set the `CRT_CERTIFICATE_PATH` property to the path to the .crt certificate you generated or received earlier
-5. Set the `useDeveloperApi` property to false if you want production data
+3. Set the `CLIENT_SECRET` property to the client secret provided by Heimdall Power, corresponding to the application client ID
+4. Set the `useDeveloperApi` property to false if you want production data
 
 # Run
 

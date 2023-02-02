@@ -14,16 +14,17 @@ logging.basicConfig(filename="PythonClientLogger.log", encoding= "utf-8", format
 #SSL verify is set to False in requests, ignoring verbose messages
 requests.packages.urllib3.disable_warnings()
 
-class HeimdallAPI:
-    TENANT_ID = "132d3d43-145b-4d30-aaf3-0a47aa7be073"
-    
-    def __init__(self, client_id: str, thumbprint: str, path_to_certificate: str, use_dev_api : bool = True) -> None:
+class HeimdallAPI:    
+    def __init__(self, client_id: str, client_secret: str, use_dev_api : bool = True) -> None:
         self.client_id = client_id
-        self.thumbprint = thumbprint
-        self.path_to_certificate = path_to_certificate
+        self.client_secret = client_secret
+        self.policy = "B2C_1A_CLIENTCREDENTIALSFLOW"
+        self.instance = "https://hpadb2cdev.b2clogin.com" if use_dev_api else "https://hpadb2cprod.b2clogin.com"
+        self.domain = "hpadb2cdev.onmicrosoft.com" if use_dev_api else "hpadb2cprod.onmicrosoft.com"
         self.api_url = "https://api.heimdallcloud-dev.com" if use_dev_api else "https://api.heimdallcloud.com"
-        self.scope = ['6b9ba5c0-4a21-4263-bbf5-8c4e30c0ee1b/.default'] if use_dev_api else ['aac6dec0-4c1b-4565-a825-5bb9401a1547/.default']
-        self.authority = f"https://login.microsoftonline.com/{self.TENANT_ID}"
+        self.backend_client_id = "f2fd8894-ae2e-4965-8318-e6c6781b5b80" if use_dev_api else "dc5758ae-4eea-416e-9e61-812914d9a49a"
+        self.scope = [f'https://{self.domain}/{self.backend_client_id}/.default']
+        self.authority = f'{self.instance}/tfp/{self.domain}/{self.policy}'
         
         self.access_token = self.get_access_token()["access_token"]
         self.requestHeaders = {
@@ -34,17 +35,9 @@ class HeimdallAPI:
         self.lines = self.get_lines()
 
     def get_access_token(self) -> dict:
-        with open(self.path_to_certificate, "r") as certificate_file:
-            private_key = certificate_file.read()
-            certificate_file.close()
-
-        client_credential = {
-            "thumbprint" : self.thumbprint,
-            "private_key": private_key
-        }
         
         try:
-            client_app = msal.ConfidentialClientApplication(self.client_id, authority=self.authority, client_credential=client_credential)
+            client_app = msal.ConfidentialClientApplication(self.client_id, authority=self.authority, client_credential=self.client_secret)
             client_token = client_app.acquire_token_for_client(scopes=self.scope)
             if ("error" or "error_description") in client_token:
                 raise IncorrectAccessTokenError
@@ -91,11 +84,11 @@ class HeimdallAPI:
             print(message) 
             print(f"{json.dumps(lines, indent=4)} \n\nrequest data with the ids of lines, spans, and span phases from the response above")
 
+            return lines
+
         except Exception as error:
             logging.error(f"{error}")
             logging.error("*"*65)
-
-        return lines
     
     def get_aggregated_current_for_line(self, line_index: int) -> None:
         if not self.lines:
