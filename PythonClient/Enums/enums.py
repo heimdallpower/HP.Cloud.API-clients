@@ -18,3 +18,5 @@ class DLRType(str, Enum):
     HP = 'HP'
     Cigre = 'Cigre'
     IEEE = 'IEEE'
+    TransmissionChainRating = 'TransmissionChainRating'
+    HPVirtualDLR = 'HPVirtualDLR'
