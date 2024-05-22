@@ -1,0 +1,34 @@
+name: Build
+
+on:
+  push:
+    branches:
+      - '**' # Run on push to any branch
+
+jobs:
+  build:
+    name: Build the project
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup dotnet
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 7.0.x
+
+      - name: Build the .NET client
+        run: |
+          cd DotNetClient
+          dotnet build --configuration Release
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Build the Java client
+        run: |
+          cd JavaClient
+          mvn --batch-mode --update-snapshots verify
