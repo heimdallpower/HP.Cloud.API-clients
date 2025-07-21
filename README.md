@@ -1,3 +1,11 @@
+# ⚠️ DEPRECATED
+
+This repository is no longer actively maintained.
+
+The code will continue to function, but we recommend using [Heimdall Power API SDK](https://github.com/heimdallpower/api-sdk) if possible.
+
+No further updates or support are planned.
+
 # Heimdall API clients
 
 ## Introduction
